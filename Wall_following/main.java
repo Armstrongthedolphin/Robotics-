@@ -9,9 +9,6 @@ import lejos.hardware.port.SensorPort;
 import lejos.hardware.sensor.EV3TouchSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.SensorMode;
-
-//import lejos.robotics.RegulatedMotor;
-
 	
 public class Main {
 	
@@ -25,38 +22,22 @@ public class Main {
 		
 		EV3MediumRegulatedMotor mA = new EV3MediumRegulatedMotor(MotorPort.A);
 		EV3MediumRegulatedMotor mB = new EV3MediumRegulatedMotor(MotorPort.B);
-		EV3TouchSensor touchSensor = new EV3TouchSensor(SensorPort.S2);
+		//EV3TouchSensor touchSensor = new EV3TouchSensor(SensorPort.S2);
 		EV3UltrasonicSensor ultraSensor = new EV3UltrasonicSensor(SensorPort.S4);
 
 		mA.synchronizeWith(new EV3MediumRegulatedMotor[] {mB});
 
-		SensorMode touch = touchSensor.getTouchMode();
+		//SensorMode touch = touchSensor.getTouchMode();
 		SensorMode sonic = (SensorMode) ultraSensor.getDistanceMode();
 		
-		//Odometer test
-		System.out.println("Moving forward into the great big world, Odometer style!");
-		float distanceToGo = 1.50f;
-		double numRotations = ( distanceToGo / (RADIUS * 2 * PI));
-		int angle = (int) (360.0 * numRotations);
-		mA.setSpeed(180);
-		mB.setSpeed(180);
-		mA.startSynchronization();
-		mA.rotate(angle, false);
-		mB.rotate(angle, false);
-		mA.endSynchronization();
-		
-		displacement = distanceToGo;
-		Sound.beep();
-		System.out.println("\n\n\n\n\n\nWaiting to proceed to next step");
-		Button.ENTER.waitForPressAndRelease();
-		
-		
-		
-		//SONAR TEST
-		System.out.println("\n\n\n\n\n\n\nSonar test!");
-		float distanceToWall = .45f + SONAR_OFFSET;
+		//Moving towards the wall until  30cm from the wall
+		System.out.println("Moving towards the wall!");
+		float distanceToWall = .30f + SONAR_OFFSET;
 		float[] sonarSample = new float[sonic.sampleSize()];
 		sonic.fetchSample(sonarSample, 0);
+		
+		//try while?
+	
 		
 //		System.out.println("Initial Distance to wall: " + (sonarSample[0] + SONAR_OFFSET));
 		if(sonarSample[0] > distanceToWall) {
@@ -80,8 +61,7 @@ public class Main {
 		
 		
 		
-		//bump test
-		//move forward until hits the wall
+		//turn right 
 		mA.setSpeed(180);
 		mB.setSpeed(180);
 		mA.startSynchronization();
@@ -89,37 +69,21 @@ public class Main {
 		mA.forward();
 		mA.endSynchronization();
 		
-		//stop when you hit a wall
-		float[] touchSample = new float[touch.sampleSize()];
-		while(touchSample[0] == 0){
-			touch.fetchSample(touchSample, 0);
-		}
-		mA.startSynchronization();
+		//wall following
 		
-		mB.stop();
-		mA.stop();
-		mA.endSynchronization();
-
-		//move back till 45cm away from wall
+		//turn to face forward
+		
+		//move 0.75m 
+		float distanceToGo = 0.75f;
+		double numRotations = ( distanceToGo / (RADIUS * 2 * PI));
+		int angle = (int) (360.0 * numRotations);
+		mA.setSpeed(180);
+		mB.setSpeed(180);
 		mA.startSynchronization();
-		mA.rotate(-720, false);
-		mB.rotate(-720, false);
-		mA.endSynchronization();
-		mA.startSynchronization();
-		mB.backward();
-		mA.backward();
-		mA.endSynchronization();
-		sonic.fetchSample(sonarSample, 0);
-		while(sonarSample[0] < distanceToWall){
-			sonic.fetchSample(sonarSample, 0);
-		}
-		mA.startSynchronization();
-		mB.stop();
-		mA.stop();
+		mA.rotate(angle, false);
+		mB.rotate(angle, false);
 		mA.endSynchronization();
 		
-		mA.close();
-		mB.close();
 	}
 	
 	
