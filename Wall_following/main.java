@@ -64,29 +64,31 @@ public class main {
 		
 		Sound.beep();
 		System.out.println("\n\n\n\n\n\nWaiting to proceed to next step");
-		Button.ENTER.waitForPressAndRelease();
-		
-		
+		Button.ENTER.waitForPressAndRelease();	
 		
 		//turn right 
-		mA.setSpeed(180);
-		mB.setSpeed(180);
-		mA.startSynchronization();
-		mB.forward();
-		mA.forward();
-		mA.endSynchronization();
+		double rightAngleRotations = .5;
+		int angle = (int) (360.0 * rightAngleRotations); 		
+		
+		mA.rotate(angle, false);
+		//mB.rotate(angle, false);
+		
 		
 		//wall following (Bang Bang)
 		float leftbound = .1f;
 		float rightbound = .2f; 
 		float midline = .15f;
 		float initspeed = 180f;
+		boolean forever = true;
 		int state = STRAIGHT; 
+		float previousSonarMeasure = 0;
+
 		mA.startSynchronization();
 		mB.forward();//left wheel
 		mA.forward();//right wheel
 		mA.endSynchronization();
 		sonic.fetchSample(sonarSample, 0);
+
 		while(sonarSample[0] <  .30){
 			//less than 0.10cm, turn right
 			if(sonarSample[0] < leftbound){
@@ -94,26 +96,27 @@ public class main {
 				state = RIGHT;
 				
 				
-			}else if(sonarSample[0] > rightbound){//larger than 0.20cm, turn left
+			} else if(sonarSample[0] > rightbound){//larger than 0.20m, turn left
 				mB.setSpeed(initspeed+10);
 				state = LEFT;
-			}else{//between 0.1cm and 0.2cm, go straight
+			} else{//between 0.1m and 0.2m, go straight
 				if (state != STRAIGHT){
 					mA.setSpeed(initspeed);
 					mB.setSpeed(initspeed);
 					state = STRAIGHT;
 				}
-				
-			
 			}
+			previousSonarMeasure = sonarSample[0];
+			sonic.fetchSample(sonarSample, 0);
 		}
 		
 		//turn to face forward
 		
+		
 		//move 0.75m 
 		float distanceToGo = 0.75f;
 		double numRotations = ( distanceToGo / (RADIUS * 2 * PI));
-		int angle = (int) (360.0 * numRotations);
+		angle = (int) (360.0 * numRotations);
 		mA.setSpeed(180);
 		mB.setSpeed(180);
 		mA.startSynchronization();
