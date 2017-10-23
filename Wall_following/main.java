@@ -10,7 +10,7 @@ import lejos.hardware.sensor.EV3TouchSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.SensorMode;
 	
-public class Main {
+public class main {
 	
 	final static double RADIUS= .0275; //RADIUS of the tires in meters
 	final static double PI = 3.141592653589793;
