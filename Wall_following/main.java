@@ -9,6 +9,7 @@ import lejos.hardware.port.SensorPort;
 import lejos.hardware.sensor.EV3TouchSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.SensorMode;
+import static java.lang.Math.*;
 
 
 
@@ -75,8 +76,14 @@ public class main {
 		//wall following (Bang Bang)
 		float leftbound = .1f;
 		float rightbound = .2f; 
-		float midline = .15f;
+		float setDistance = .05f;
 		float initspeed = 180f;
+		float error = 0f;
+		float newerror = 0f;
+		float errordiff = 0f;
+		float initbufferspeed = 20f;
+		float bufferspeed = 0f;
+		float setbuffer = 0f;
 		boolean forever = true;
 		int state = STRAIGHT; 
 		mA.startSynchronization();
@@ -84,23 +91,35 @@ public class main {
 		mA.forward();//right wheel
 		mA.endSynchronization();
 		sonic.fetchSample(sonarSample, 0);
+		error = sonarSample[0] - setDistance;
 		while(forever){
-			//less than 0.10cm, turn right
-			if(sonarSample[0] < leftbound){
-				mA.setSpeed(initspeed+10);
-				state = RIGHT;
-				
-				
-			}else if(sonarSample[0] > rightbound){//larger than 0.20cm, turn left
-				mB.setSpeed(initspeed+10);
-				state = LEFT;
-			}else{//between 0.1cm and 0.2cm, go straight
-				if (state != STRAIGHT){
-					mA.setSpeed(initspeed);
-					mB.setSpeed(initspeed);
-					state = STRAIGHT;
-				}
+			newerror = sonarSample[0] - setDistance;
+			errordiff = newerror - error; // if positive, error increase
+			//according to the error difference, adjust the angle with one wheel set to speed 0
+			if ( abs(errordiff) > setbuffer ){
+				//adjust angle
 			}
+//			if(errordiff > 0){
+//				bufferspeed = error;
+//				
+//				mA.setSpeed(initspeed+10);
+//				state = RIGHT;
+//				
+//				
+//			}else if(sonarSample[0] > rightbound){//larger than 0.20cm, turn left
+//				mB.setSpeed(initspeed+10);
+//				state = LEFT;
+//			}else{//between 0.1cm and 0.2cm, go straight
+//				if (state != STRAIGHT){
+//					mA.setSpeed(initspeed);
+//					mB.setSpeed(initspeed);
+//					state = STRAIGHT;
+//				}
+//			}
+			error = newerror;
+			
+			sonic.fetchSample(sonarSample, 0);
+			
 		}
 		
 		//turn to face forward
@@ -118,6 +137,7 @@ public class main {
 		mA.endSynchronization();
 		
 	}
+
 	
 	
 
