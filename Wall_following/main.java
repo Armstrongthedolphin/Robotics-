@@ -9,12 +9,18 @@ import lejos.hardware.port.SensorPort;
 import lejos.hardware.sensor.EV3TouchSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.SensorMode;
+
+
+
 	
 public class main {
 	
 	final static double RADIUS= .0275; //RADIUS of the tires in meters
 	final static double PI = 3.141592653589793;
 	final static float SONAR_OFFSET = .024f; //how far the sonar is from front of robut
+	final static int STRAIGHT = 0;
+	final static int LEFT = 1;
+	final static int RIGHT = 2;
 	static double displacement = 0.0;
 	
 	
@@ -46,8 +52,7 @@ public class main {
 			mB.forward();
 			mA.endSynchronization();
 		}
-		//.02 is the fudge factor, "it just works"
-		while(sonarSample[0] > (distanceToWall + .024)){
+		while(sonarSample[0] > (distanceToWall)){
 			sonic.fetchSample(sonarSample, 0);
 		}
 		mA.startSynchronization();
@@ -69,7 +74,37 @@ public class main {
 		mA.forward();
 		mA.endSynchronization();
 		
-		//wall following
+		//wall following (Bang Bang)
+		float leftbound = .1f;
+		float rightbound = .2f; 
+		float midline = .15f;
+		float initspeed = 180f;
+		int state = STRAIGHT; 
+		mA.startSynchronization();
+		mB.forward();//left wheel
+		mA.forward();//right wheel
+		mA.endSynchronization();
+		sonic.fetchSample(sonarSample, 0);
+		while(true){
+			//less than 0.10cm, turn right
+			if(sonarSample[0] < leftbound){
+				mA.setSpeed(initspeed+10);
+				state = RIGHT;
+				
+				
+			}else if(sonarSample[0] > rightbound){//larger than 0.20cm, turn left
+				mB.setSpeed(initspeed+10);
+				state = LEFT;
+			}else{//between 0.1cm and 0.2cm, go straight
+				if (state != STRAIGHT){
+					mA.setSpeed(initspeed);
+					mB.setSpeed(initspeed);
+					state = STRAIGHT;
+				}
+				
+			
+			}
+		}
 		
 		//turn to face forward
 		
