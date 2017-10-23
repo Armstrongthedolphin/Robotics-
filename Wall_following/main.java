@@ -9,19 +9,21 @@ import lejos.hardware.port.SensorPort;
 import lejos.hardware.sensor.EV3TouchSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.SensorMode;
-
-
+import java.lang.Math;
 
 	
 public class main {
 	
 	final static double RADIUS= .0275; //RADIUS of the tires in meters
 	final static double PI = 3.141592653589793;
-	final static float SONAR_OFFSET = .024f; //how far the sonar is from front of robut
+//	final static float SONAR_OFFSET = .024f; //how far the sonar is from front of robut
 	final static int STRAIGHT = 0;
 	final static int LEFT = 1;
 	final static int RIGHT = 2;
-	static double displacement = 0.0;
+	final static double AXLE_LENGTH = .17; //distance between two wheels, need to change
+	final static double SONAR_ANGLE = PI / 4.0;
+//	static double displacement = 0.0;
+	static double orientation = PI / 2.0; //angle from right, measured counterclockwise
 	
 	
 	public static void main(String[] args) {
@@ -38,7 +40,7 @@ public class main {
 		
 		//Moving towards the wall until  30cm from the wall
 		System.out.println("Moving towards the wall!");
-		float distanceToWall = .30f + SONAR_OFFSET;
+		float distanceToWall = .15f;
 		float[] sonarSample = new float[sonic.sampleSize()];
 		sonic.fetchSample(sonarSample, 0);
 		
@@ -46,7 +48,7 @@ public class main {
 	
 		
 //		System.out.println("Initial Distance to wall: " + (sonarSample[0] + SONAR_OFFSET));
-		if(sonarSample[0] > distanceToWall) {
+		if(getFrontDistance(sonarSample[0]) > distanceToWall) {
 			mA.startSynchronization();
 			mA.forward();
 			mB.forward();
@@ -85,7 +87,7 @@ public class main {
 		mA.forward();//right wheel
 		mA.endSynchronization();
 		sonic.fetchSample(sonarSample, 0);
-		while(true){
+		while(sonarSample[0] <  .30){
 			//less than 0.10cm, turn right
 			if(sonarSample[0] < leftbound){
 				mA.setSpeed(initspeed+10);
@@ -119,6 +121,11 @@ public class main {
 		mB.rotate(angle, false);
 		mA.endSynchronization();
 		
+	}
+	
+	//
+	private static float getFrontDistance(float sonarDistance) {
+		return (float) Math.cos(sonarDistance) * sonarDistance;
 	}
 	
 	
