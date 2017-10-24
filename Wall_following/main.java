@@ -24,7 +24,7 @@ public class main {
 	final static int RIGHT = 2;
 	final static double AXLE_LENGTH = .17;
 	static double displacement = 0.0;
-	static double mOrientation = PI/ 4.0;
+	static double mOrientation = PI/ 4.0;//????why init to this
 	
 	
 	public static void main(String[] args) {
@@ -68,11 +68,8 @@ public class main {
 		Button.ENTER.waitForPressAndRelease();	
 		
 		//turn right 
-		double rightAngleRotations = .5;
-		int angle = (int) (360.0 * rightAngleRotations); 		
+		rotateAngle((float) (-PI/4.0), mA, mB);
 		
-		mA.rotate(angle, false);
-		//mB.rotate(angle, false);
 		
 		
 		//wall following (Bang Bang)
@@ -147,7 +144,7 @@ public class main {
 		//move 0.75m 
 		float distanceToGo = 0.75f;
 		double numRotations = ( distanceToGo / (RADIUS * 2 * PI));
-		angle = (int) (360.0 * numRotations);
+		int angle = (int) (360.0 * numRotations);
 		mA.setSpeed(180);
 		mB.setSpeed(180);
 		mA.startSynchronization();
