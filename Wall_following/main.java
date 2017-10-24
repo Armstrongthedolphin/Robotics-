@@ -87,6 +87,8 @@ public class main {
 		float bufferspeed = 0f;
 		float setbuffer = 0.02f;
 		float terminatediff = 0f;
+		float distanceTraveled = 0f;
+		float adjustAngle = 0f;
 		boolean forever = true;
 		int state = STRAIGHT; 
 		mA.startSynchronization();
@@ -99,10 +101,14 @@ public class main {
 			newerror = sonarSample[0] - setDistance;
 			errordiff = newerror - error; // if positive, error increase
 			//according to the error difference, adjust the angle with one wheel set to speed 0
-			if ( abs(errordiff) > terminatediff ){
-				//adjust angle
+			if ( abs(errordiff) > terminatediff ){//end of the wall, break loop
+				
+				break;
 			} else if(abs(errordiff) > setbuffer){
 				//adjust angle
+				//calculate distance traveled
+				adjustAngle = calculateAngle(error, newerror,distanceTraveled );
+				rotateAngle(adjustAngle, mA, mB);
 				
 			}
 //			if(errordiff > 0){
@@ -183,8 +189,7 @@ public class main {
 	//takes in two sonar readings and the distance traveled between those two readings
 	//outputs the angle of attack to object detected by sonar in radians
 	//positive values mean going towards object
-	private static float calculateAngle(float sonar0, float sonar1, 
-											float distanceTravelled) {
+	private static float calculateAngle(float sonar0, float sonar1, float distanceTravelled) {
 		float angle = (float) Math.acos((sonar1 - sonar0)/distanceTravelled);
 		return angle;
 	}
