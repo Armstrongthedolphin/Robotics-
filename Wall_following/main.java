@@ -19,7 +19,7 @@ public class main {
 	final static double RADIUS= .0275; //RADIUS of the tires in meters
 	final static double PI = 3.141592653589793;
 	final static float SONAR_OFFSET = .024f; //how far the sonar is from front of robut
-	final static double AXLE_LENGTH = .17;
+	final static double AXLE_LENGTH = .124;
 	static double displacement = 0.0;
 	static double mOrientation = PI/ 4.0;//????why init to this
 	
