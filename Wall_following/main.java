@@ -117,7 +117,13 @@ public class main {
 //				}
 //			}
 			error = newerror;
-			
+			mA.setSpeed(initspeed);
+			mB.setSpeed(initspeed);
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			sonic.fetchSample(sonarSample, 0);
 			
 		}
