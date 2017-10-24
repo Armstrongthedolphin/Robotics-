@@ -96,7 +96,7 @@ public class main {
 			newerror = sonarSample[0] - setDistance;
 			errordiff = newerror - error; // if positive, error increase
 			//according to the error difference, adjust the angle with one wheel set to speed 0
-			if ( abs(errordiff) > setbuffer ){
+			if ( Math.abs(errordiff) > setbuffer ){
 				//adjust angle
 			}
 //			if(errordiff > 0){
