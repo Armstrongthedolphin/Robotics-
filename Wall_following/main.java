@@ -143,17 +143,38 @@ public class main {
 		
 		//move 0.75m 
 		float distanceToGo = 0.75f;
-		double numRotations = ( distanceToGo / (RADIUS * 2 * PI));
-		int angle = (int) (360.0 * numRotations);
-		mA.setSpeed(180);
-		mB.setSpeed(180);
-		mA.startSynchronization();
-		mA.rotate(angle, false);
-		mB.rotate(angle, false);
-		mA.endSynchronization();
+		goforward(distanceToGo, mA, mB);
 		
 	}
-	//
+	
+	
+	private static void goforward(float distanceToGo, EV3MediumRegulatedMotor left, EV3MediumRegulatedMotor right) {
+		float distance = distanceToGo;
+		double numRotations = ( distance / (RADIUS * 2 * PI));
+		int angle = (int) (360.0 * numRotations);
+		left.setSpeed(180);
+		right.setSpeed(180);
+		left.startSynchronization();
+		left.rotate(angle, false);
+		right.rotate(angle, false);
+		left.endSynchronization();
+		
+	}
+	
+	private static void goforward(float distanceToGo, int leftSpeed, int rightSpeed, EV3MediumRegulatedMotor left, EV3MediumRegulatedMotor right) {
+		float distance = distanceToGo;
+		double numRotations = ( distance / (RADIUS * 2 * PI));
+		int angle = (int) (360.0 * numRotations);
+		left.setSpeed(leftSpeed);
+		right.setSpeed(rightSpeed);
+		left.startSynchronization();
+		left.rotate(angle, false);
+		right.rotate(angle, false);
+		left.endSynchronization();
+		
+	}
+
+
 	private static float getFrontDistance(float sonarDistance) {
 		return (float) Math.cos(sonarDistance) * sonarDistance;
 	}
