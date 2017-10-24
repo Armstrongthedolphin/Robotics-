@@ -19,9 +19,6 @@ public class main {
 	final static double RADIUS= .0275; //RADIUS of the tires in meters
 	final static double PI = 3.141592653589793;
 	final static float SONAR_OFFSET = .024f; //how far the sonar is from front of robut
-	final static int STRAIGHT = 0;
-	final static int LEFT = 1;
-	final static int RIGHT = 2;
 	final static double AXLE_LENGTH = .17;
 	static double displacement = 0.0;
 	static double mOrientation = PI/ 4.0;//????why init to this
@@ -73,21 +70,17 @@ public class main {
 		
 		
 		//wall following (Bang Bang)
-		float leftbound = .1f;
-		float rightbound = .2f; 
 		float setDistance = .05f;
 		float initspeed = 180f;
 		float error = 0f;
 		float newerror = 0f;
 		float errordiff = 0f;
-		float initbufferspeed = 20f;
-		float bufferspeed = 0f;
 		float setbuffer = 0.02f;
 		float terminatediff = 0f;
 		float distanceTraveled = 0f;
 		float adjustAngle = 0f;
+		float infinity = .40f;
 		boolean forever = true;
-		int state = STRAIGHT; 
 		mA.startSynchronization();
 		mB.forward();//left wheel
 		mA.forward();//right wheel
@@ -98,7 +91,7 @@ public class main {
 			newerror = sonarSample[0] - setDistance;
 			errordiff = newerror - error; // if positive, error increase
 			//according to the error difference, adjust the angle with one wheel set to speed 0
-			if ( abs(errordiff) > terminatediff ){//end of the wall, break loop
+			if ( abs(errordiff) > terminatediff || newerror > infinity ){//end of the wall, break loop
 				
 				break;
 			} else if(abs(errordiff) > setbuffer){
@@ -108,23 +101,6 @@ public class main {
 				rotateAngle(adjustAngle, mA, mB);
 				
 			}
-//			if(errordiff > 0){
-//				bufferspeed = error;
-//				
-//				mA.setSpeed(initspeed+10);
-//				state = RIGHT;
-//				
-//				
-//			}else if(sonarSample[0] > rightbound){//larger than 0.20cm, turn left
-//				mB.setSpeed(initspeed+10);
-//				state = LEFT;
-//			}else{//between 0.1cm and 0.2cm, go straight
-//				if (state != STRAIGHT){
-//					mA.setSpeed(initspeed);
-//					mB.setSpeed(initspeed);
-//					state = STRAIGHT;
-//				}
-//			}
 			error = newerror;
 			mA.setSpeed(initspeed);
 			mB.setSpeed(initspeed);
@@ -138,7 +114,7 @@ public class main {
 		}
 		
 		//turn to face forward
-		    //
+		
 		
 		
 		//move 0.75m 
