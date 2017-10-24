@@ -56,17 +56,21 @@ public class main {
 		float distanceToGo = .15f;
 		double numRotations = ( distanceToGo / (RADIUS * 2 * PI));
 		int backAngle = (int) (-360.0 * numRotations);
+		System.out.println(backAngle);
 		mA.setSpeed(180);
 		mB.setSpeed(180);
 		mA.startSynchronization();
 		mA.rotate(backAngle, false);
 		mB.rotate(backAngle, false);
 		mA.endSynchronization();
-	
+		
 		Sound.beep();
+		Button.ENTER.waitForPressAndRelease();
 		
 		//turn right 
-		rotateAngle((float) (-PI/4.0), mA, mB);
+		rotateAngle((float) (-PI/2.0), mA, mB);
+		Sound.beep();
+		Button.ENTER.waitForPressAndRelease();
 		
 		
 		
@@ -167,6 +171,7 @@ public class main {
 		float wheelRotationSpeedDegrees;
 		float wheelRotationSpeedRadians;
 		
+		System.out.println("Turning " + angle * 180.0f/PI + "degrees" );
 		if (angle < 0) {	//turning left
 			
 			wheelRotationSpeedDegrees = right.getRotationSpeed();
@@ -178,6 +183,7 @@ public class main {
 				desiredAngularVelocity = (float) (( wheelRotationSpeedRadians * RADIUS) / AXLE_LENGTH) ;
 				timeToRotate = (long) ( -angle / desiredAngularVelocity) * 1000000000; 
 				while(System.nanoTime() < timeToRotate) {
+					right.forward();
 				}
 				right.stop();
 				
@@ -195,13 +201,15 @@ public class main {
 		} else {	//turning right
 			wheelRotationSpeedDegrees = left.getRotationSpeed();
 			
-			if (wheelRotationSpeedDegrees == 0) { //sammy is stationary
+			if (wheelRotationSpeedDegrees <=  1) { //sammy is stationary 
+				
 				wheelRotationSpeedDegrees = 180;
 				left.setSpeed(wheelRotationSpeedDegrees);
 				wheelRotationSpeedRadians = (float) (wheelRotationSpeedDegrees  * PI / 180.0);
 				desiredAngularVelocity = (float) (( wheelRotationSpeedRadians * RADIUS) / AXLE_LENGTH) ;
 				timeToRotate = (long) ( -angle / desiredAngularVelocity) * 1000000000; 
 				while(System.nanoTime() < timeToRotate) {
+					left.forward();
 				}
 				left.stop();
 				
