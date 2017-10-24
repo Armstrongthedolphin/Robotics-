@@ -23,55 +23,51 @@ public class main {
 	final static double AXLE_LENGTH = .17; //distance between two wheels, need to change
 	final static double SONAR_ANGLE = PI / 4.0;
 //	static double displacement = 0.0;
-	static double orientation = PI / 2.0; //angle from right, measured counterclockwise
+	static double mOrientation = PI / 2.0; //angle from right, measured counterclockwise
 	
 	
 	public static void main(String[] args) {
 		
-		EV3MediumRegulatedMotor mA = new EV3MediumRegulatedMotor(MotorPort.A);
-		EV3MediumRegulatedMotor mB = new EV3MediumRegulatedMotor(MotorPort.B);
-		//EV3TouchSensor touchSensor = new EV3TouchSensor(SensorPort.S2);
+		EV3MediumRegulatedMotor mA = new EV3MediumRegulatedMotor(MotorPort.A); //left motor
+		EV3MediumRegulatedMotor mB = new EV3MediumRegulatedMotor(MotorPort.B); //right motor
+		EV3TouchSensor touchSensor = new EV3TouchSensor(SensorPort.S2);
 		EV3UltrasonicSensor ultraSensor = new EV3UltrasonicSensor(SensorPort.S4);
 
 		mA.synchronizeWith(new EV3MediumRegulatedMotor[] {mB});
 
-		//SensorMode touch = touchSensor.getTouchMode();
+		SensorMode touch = touchSensor.getTouchMode();
 		SensorMode sonic = (SensorMode) ultraSensor.getDistanceMode();
 		
-		//Moving towards the wall until  30cm from the wall
-		System.out.println("Moving towards the wall!");
-		float distanceToWall = .15f;
 		float[] sonarSample = new float[sonic.sampleSize()];
-		sonic.fetchSample(sonarSample, 0);
+		float[] touchSample = new float[touch.sampleSize()];
 		
-		//try while?
-	
 		
-//		System.out.println("Initial Distance to wall: " + (sonarSample[0] + SONAR_OFFSET));
-		if(getFrontDistance(sonarSample[0]) > distanceToWall) {
-			mA.startSynchronization();
-			mA.forward();
-			mB.forward();
-			mA.endSynchronization();
-		}
-		while(sonarSample[0] > (distanceToWall)){
-			sonic.fetchSample(sonarSample, 0);
+		//Go until bump into wall
+		System.out.println("Moving towards the wall!");
+		while(touchSample[0] == 0){
+			touch.fetchSample(touchSample, 0);
 		}
 		mA.startSynchronization();
 		mB.stop();
 		mA.stop();
 		mA.endSynchronization();
 		
+		float distanceToGo = .15f;
+		double numRotations = ( distanceToGo / (RADIUS * 2 * PI));
+		int backAngle = (int) (-360.0 * numRotations);
+		mA.startSynchronization();
+		mA.rotate(backAngle, false);
+		mB.rotate(backAngle, false);
+		mA.endSynchronization();	
 		Sound.beep();
-		System.out.println("\n\n\n\n\n\nWaiting to proceed to next step");
-		Button.ENTER.waitForPressAndRelease();	
+		
+		
+		
 		
 		//turn right 
-		double rightAngleRotations = .5;
-		int angle = (int) (360.0 * rightAngleRotations); 		
+		rotateAngle((float) (-PI/4.0), mA, mB);
+		Sound.beep();
 		
-		mA.rotate(angle, false);
-		//mB.rotate(angle, false);
 		
 		
 		//wall following (Bang Bang)
@@ -114,14 +110,14 @@ public class main {
 		
 		
 		//move 0.75m 
-		float distanceToGo = 0.75f;
-		double numRotations = ( distanceToGo / (RADIUS * 2 * PI));
-		angle = (int) (360.0 * numRotations);
+		distanceToGo = 0.75f;
+		numRotations = ( distanceToGo / (RADIUS * 2 * PI));
+		int forwardAngle = (int) (360.0 * numRotations);
 		mA.setSpeed(180);
 		mB.setSpeed(180);
 		mA.startSynchronization();
-		mA.rotate(angle, false);
-		mB.rotate(angle, false);
+		mA.rotate(forwardAngle, false);
+		mB.rotate(forwardAngle, false);
 		mA.endSynchronization();
 		
 	}
@@ -129,6 +125,41 @@ public class main {
 	//
 	private static float getFrontDistance(float sonarDistance) {
 		return (float) Math.cos(sonarDistance) * sonarDistance;
+	}
+	
+	private static void rotateAngle(float angle, EV3MediumRegulatedMotor left, EV3MediumRegulatedMotor right) {
+		long initTime = System.nanoTime();
+		long timeToRotate;
+		float desiredAngularVelocity;
+		double wheelRotationSpeed;
+		if (angle < 0) {
+			wheelRotationSpeed = right.getRotationSpeed();
+			desiredAngularVelocity = (float) (( wheelRotationSpeed * RADIUS) / AXLE_LENGTH) ;
+			timeToRotate = (long) ( -angle / desiredAngularVelocity) * 1000000000; 
+			left.stop();
+			while(System.nanoTime() < timeToRotate) {
+			}
+			left.forward();
+			
+		} else {
+			wheelRotationSpeed = left.getRotationSpeed();
+			desiredAngularVelocity = (float) (( wheelRotationSpeed * RADIUS) / AXLE_LENGTH) ;
+			timeToRotate = (long) (angle / desiredAngularVelocity) * 1000000000; 
+			right.stop();
+			while(System.nanoTime() < timeToRotate) {
+			}
+			right.forward();
+		}
+		mOrientation += angle;
+	}
+	
+	//takes in two sonar readings and the distance traveled between those two readings
+	//outputs the angle of attack to object detected by sonar in radians
+	//positive values mean going towards object
+	private static float calculateAngle(float sonar0, float sonar1, 
+											float distanceTravelled) {
+		float angle = (float) Math.acos((sonar1 - sonar0)/distanceTravelled);
+		return angle;
 	}
 	
 	
