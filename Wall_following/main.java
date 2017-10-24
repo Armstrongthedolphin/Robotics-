@@ -102,7 +102,8 @@ public class main {
 			errordiff = newerror - error; // if positive, error increase
 			//according to the error difference, adjust the angle with one wheel set to speed 0
 			if ( abs(errordiff) > terminatediff || newerror > infinity ){//end of the wall, break loop
-				
+				Sound.beep();
+				Button.ENTER.waitForPressAndRelease();
 				break;
 			} else if(abs(errordiff) > setbuffer){
 				//adjust angle
