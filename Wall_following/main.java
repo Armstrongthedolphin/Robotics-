@@ -27,10 +27,10 @@ public class main {
 	public static void main(String[] args) {
 		
 		EV3MediumRegulatedMotor mA = new EV3MediumRegulatedMotor(MotorPort.A);
-		EV3MediumRegulatedMotor mB = new EV3MediumRegulatedMotor(MotorPort.B);
+		EV3MediumRegulatedMotor mB = new EV3MediumRegulatedMotor(MotorPort.D);
 		mA.synchronizeWith(new EV3MediumRegulatedMotor[] {mB});
 		
-		EV3TouchSensor touchSensor = new EV3TouchSensor(SensorPort.S2);
+		EV3TouchSensor touchSensor = new EV3TouchSensor(SensorPort.S3);
 		EV3UltrasonicSensor ultraSensor = new EV3UltrasonicSensor(SensorPort.S4);
 		SensorMode touch = touchSensor.getTouchMode();
 		SensorMode sonic = (SensorMode) ultraSensor.getDistanceMode();
