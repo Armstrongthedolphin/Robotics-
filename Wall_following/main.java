@@ -80,7 +80,7 @@ public class main {
 		
 		//wall following (Bang Bang)
 		float setDistance = .05f;
-		float initspeed = 180f;
+		float initspeed = 90f;
 		float error = 0f;
 		float newerror = 0f;
 		float errordiff = 0f;
