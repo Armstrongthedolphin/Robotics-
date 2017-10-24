@@ -79,10 +79,11 @@ public class main {
 		float newerror = 0f;
 		float errordiff = 0f;
 		float setbuffer = 0.02f;
-		float terminatediff = 0f;
+		float terminatediff = 0.4f;
 		float distanceTraveled = 0f;
 		float adjustAngle = 0f;
 		float infinity = .40f;
+		float travelTime = 100f;
 		boolean forever = true;
 		mA.startSynchronization();
 		mB.forward();//left wheel
@@ -100,6 +101,7 @@ public class main {
 			} else if(abs(errordiff) > setbuffer){
 				//adjust angle
 				//calculate distance traveled
+				distanceTraveled = (float) ( initspeed * travelTime * (PI / 360) * RADIUS);
 				adjustAngle = calculateAngle(error, newerror,distanceTraveled );
 				rotateAngle(adjustAngle, mA, mB);
 				
@@ -109,7 +111,7 @@ public class main {
 			mA.setSpeed(initspeed);
 			mB.setSpeed(initspeed);
 			try {
-				Thread.sleep(100);
+				Thread.sleep((long)travelTime);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
