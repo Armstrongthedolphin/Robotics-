@@ -22,53 +22,56 @@ public class main {
 	final static int STRAIGHT = 0;
 	final static int LEFT = 1;
 	final static int RIGHT = 2;
-	final static double AXLE_LENGTH = .17;
+	final static double AXLE_LENGTH = .124;
 	static double displacement = 0.0;
-	static double mOrientation = PI/ 4.0;//????why init to this
+	static double mOrientation = 0.0;
 	
 	
 	public static void main(String[] args) {
 		
 		EV3MediumRegulatedMotor mA = new EV3MediumRegulatedMotor(MotorPort.A);
 		EV3MediumRegulatedMotor mB = new EV3MediumRegulatedMotor(MotorPort.B);
-		//EV3TouchSensor touchSensor = new EV3TouchSensor(SensorPort.S2);
-		EV3UltrasonicSensor ultraSensor = new EV3UltrasonicSensor(SensorPort.S4);
-
 		mA.synchronizeWith(new EV3MediumRegulatedMotor[] {mB});
-
-		//SensorMode touch = touchSensor.getTouchMode();
+		
+		EV3TouchSensor touchSensor = new EV3TouchSensor(SensorPort.S2);
+		EV3UltrasonicSensor ultraSensor = new EV3UltrasonicSensor(SensorPort.S4);
+		SensorMode touch = touchSensor.getTouchMode();
 		SensorMode sonic = (SensorMode) ultraSensor.getDistanceMode();
+		float[] touchSample = new float[touch.sampleSize()];
+		float[] sonicSample = new float[sonic.sampleSize()];
+		mA.startSynchronization();
+		mB.forward();
+		mA.forward();
+		mA.endSynchronization();
 		
-		//Moving towards the wall until  30cm from the wall
-		System.out.println("Moving towards the wall!");
-		float distanceToWall = .30f + SONAR_OFFSET;
-		float[] sonarSample = new float[sonic.sampleSize()];
-		sonic.fetchSample(sonarSample, 0);
-		
-		//try while?
-	
-		
-//		System.out.println("Initial Distance to wall: " + (sonarSample[0] + SONAR_OFFSET));
-		if(sonarSample[0] > distanceToWall) {
-			mA.startSynchronization();
-			mA.forward();
-			mB.forward();
-			mA.endSynchronization();
-		}
-		while(sonarSample[0] > (distanceToWall)){
-			sonic.fetchSample(sonarSample, 0);
+		//stop when you hit a wall
+		while(touchSample[0] == 0){
+			touch.fetchSample(touchSample, 0);
 		}
 		mA.startSynchronization();
 		mB.stop();
 		mA.stop();
 		mA.endSynchronization();
 		
+		//back up 15cm
+		float distanceToGo = .15f;
+		double numRotations = ( distanceToGo / (RADIUS * 2 * PI));
+		int backAngle = (int) (-360.0 * numRotations);
+		mA.setSpeed(180);
+		mB.setSpeed(180);
+		mA.startSynchronization();
+		mA.rotate(backAngle, false);
+		mB.rotate(backAngle, false);
+		mA.endSynchronization();
+	
 		Sound.beep();
-		System.out.println("\n\n\n\n\n\nWaiting to proceed to next step");
-		Button.ENTER.waitForPressAndRelease();	
 		
 		//turn right 
 		rotateAngle((float) (-PI/4.0), mA, mB);
+		
+		
+		
+		
 		
 		
 		
@@ -92,10 +95,10 @@ public class main {
 		mB.forward();//left wheel
 		mA.forward();//right wheel
 		mA.endSynchronization();
-		sonic.fetchSample(sonarSample, 0);
-		error = sonarSample[0] - setDistance;
+		sonic.fetchSample(sonicSample, 0);
+		error = sonicSample[0] - setDistance;
 		while(forever){
-			newerror = sonarSample[0] - setDistance;
+			newerror = sonicSample[0] - setDistance;
 			errordiff = newerror - error; // if positive, error increase
 			//according to the error difference, adjust the angle with one wheel set to speed 0
 			if ( abs(errordiff) > terminatediff ){//end of the wall, break loop
@@ -115,7 +118,7 @@ public class main {
 //				state = RIGHT;
 //				
 //				
-//			}else if(sonarSample[0] > rightbound){//larger than 0.20cm, turn left
+//			}else if(sonicSample[0] > rightbound){//larger than 0.20cm, turn left
 //				mB.setSpeed(initspeed+10);
 //				state = LEFT;
 //			}else{//between 0.1cm and 0.2cm, go straight
@@ -133,16 +136,16 @@ public class main {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			sonic.fetchSample(sonarSample, 0);
+			sonic.fetchSample(sonicSample, 0);
 			
 		}
 		
 		//turn to face forward
-		    //
+		rotateAngle((float) -mOrientation, mA, mB);
 		
 		
 		//move 0.75m 
-		float distanceToGo = 0.75f;
+		distanceToGo = 0.75f;
 		goforward(distanceToGo, mA, mB);
 		
 	}
@@ -175,35 +178,60 @@ public class main {
 	}
 
 
-	private static float getFrontDistance(float sonarDistance) {
-		return (float) Math.cos(sonarDistance) * sonarDistance;
-	}
-	
 	private static void rotateAngle(float angle, EV3MediumRegulatedMotor left, EV3MediumRegulatedMotor right) {
+		assert(right.getRotationSpeed() == 0 || left.getRotationSpeed() == 0);
 		long initTime = System.nanoTime();
 		long timeToRotate;
 		float desiredAngularVelocity;
 		double wheelRotationSpeed;
-		if (angle < 0) {
-			wheelRotationSpeed = right.getRotationSpeed();
-			desiredAngularVelocity = (float) (( wheelRotationSpeed * RADIUS) / AXLE_LENGTH) ;
-			timeToRotate = (long) ( -angle / desiredAngularVelocity) * 1000000000; 
-			left.stop();
-			while(System.nanoTime() < timeToRotate) {
-			}
-			left.forward();
+		
+		if (angle < 0) {	//turning left
 			
-		} else {
-			wheelRotationSpeed = left.getRotationSpeed();
-			desiredAngularVelocity = (float) (( wheelRotationSpeed * RADIUS) / AXLE_LENGTH) ;
-			timeToRotate = (long) (angle / desiredAngularVelocity) * 1000000000; 
-			right.stop();
-			while(System.nanoTime() < timeToRotate) {
+			wheelRotationSpeed = right.getRotationSpeed();
+			
+			if (wheelRotationSpeed == 0) { //sammy is stationary
+				right.setSpeed(180);
+				wheelRotationSpeed = 180;
+				desiredAngularVelocity = (float) (( wheelRotationSpeed * RADIUS) / AXLE_LENGTH) ;
+				timeToRotate = (long) ( -angle / desiredAngularVelocity) * 1000000000; 
+				while(System.nanoTime() < timeToRotate) {
+				}
+				right.stop();
+				
+			} else { //sammie was originally moving
+				desiredAngularVelocity = (float) (( wheelRotationSpeed * RADIUS) / AXLE_LENGTH) ;
+				timeToRotate = (long) ( -angle / desiredAngularVelocity) * 1000000000; 
+				left.stop();
+				while(System.nanoTime() < timeToRotate) {
+				}
+				left.forward();
 			}
-			right.forward();
+			
+			
+		} else {	//turning right
+			wheelRotationSpeed = left.getRotationSpeed();
+			
+			if (wheelRotationSpeed == 0) { //sammy is stationary
+				left.setSpeed(180);
+				wheelRotationSpeed = 180;
+				desiredAngularVelocity = (float) (( wheelRotationSpeed * RADIUS) / AXLE_LENGTH) ;
+				timeToRotate = (long) ( -angle / desiredAngularVelocity) * 1000000000; 
+				while(System.nanoTime() < timeToRotate) {
+				}
+				left.stop();
+				
+			} else {
+				desiredAngularVelocity = (float) (( wheelRotationSpeed * RADIUS) / AXLE_LENGTH) ;
+				timeToRotate = (long) (angle / desiredAngularVelocity) * 1000000000; 
+				right.stop();
+				while(System.nanoTime() < timeToRotate) {
+				}
+				right.forward();
+			}
 		}
 		mOrientation += angle;
 	}
+	
 	//takes in two sonar readings and the distance traveled between those two readings
 	//outputs the angle of attack to object detected by sonar in radians
 	//positive values mean going towards object
