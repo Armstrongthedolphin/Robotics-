@@ -175,7 +175,7 @@ public class main {
 		}
 		mOrientation += angle;
 	}
-	
+	//test
 	//takes in two sonar readings and the distance traveled between those two readings
 	//outputs the angle of attack to object detected by sonar in radians
 	//positive values mean going towards object
@@ -184,6 +184,7 @@ public class main {
 		float angle = (float) Math.acos((sonar1 - sonar0)/distanceTravelled);
 		return angle;
 	}
+	//test
 	
 	
 
