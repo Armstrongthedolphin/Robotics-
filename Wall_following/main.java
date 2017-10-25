@@ -65,6 +65,7 @@ public class main {
 //		Button.ENTER.waitForPressAndRelease();
 		
 		//turn right 
+		System.out.println("turn right");
 		rotateAngle((float) (PI/2.0));
 		Sound.beep();
 		Button.ENTER.waitForPressAndRelease();
@@ -86,7 +87,7 @@ public class main {
 		float distanceTraveled = 0f;
 		float adjustAngle = 0f;
 		float infinity = .40f;
-		float travelTime = 350f;
+		float travelTime = 100f;
 		boolean forever = true;
 		
 		left.startSynchronization();
@@ -96,7 +97,7 @@ public class main {
 		sonic.fetchSample(sonicSample, 0);
 		error = sonicSample[0] - setDistance;
 		while(forever){
-
+			
 			newerror = sonicSample[0] - setDistance;			
 			errordiff = newerror - error; // if positive, error increase
 			System.out.print("E " + newerror + " " + errordiff+ " ");
