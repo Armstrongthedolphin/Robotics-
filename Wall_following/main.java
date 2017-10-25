@@ -56,7 +56,7 @@ public class main {
 		Sound.beep();
 		System.out.println("Moving Backwards");
 		move(-.15f);
-		Button.ENTER.waitForPressAndRelease();
+//		Button.ENTER.waitForPressAndRelease();
 //		double numRotations = ( .15 / (RADIUS * 2 * PI));
 //		int angle = (int) (-360.0 * numRotations);
 //		left.startSynchronization();
@@ -68,7 +68,7 @@ public class main {
 		//turn right 
 		rotateAngle((float) (PI/2.0));
 		Sound.beep();
-		Button.ENTER.waitForPressAndRelease();
+		
 		
 
 		
@@ -88,7 +88,7 @@ public class main {
 		float adjustAngle = 0f;
 		float infinity = .40f;
 		long travelTime = 100000000; //in nanoseconds
-		double orientationTolerance = PI/8.0;
+		double orientationTolerance = PI/6.0;
 		long timestamp;
 		boolean forever = true;
 		left.startSynchronization();
@@ -105,7 +105,7 @@ public class main {
 			errordiff = newerror - error; // if positive, error increase
 			System.out.print("E " + newerror + " " + errordiff+ " ");
 
-			//last resort collision detection
+
 			
 			if(mOrientation < orientationTolerance) {
 				break;
@@ -139,6 +139,7 @@ public class main {
 			while(System.nanoTime() < timestamp) {
 				touch.fetchSample(touchSample, 0);
 				if(touchSample[0] != 0){
+					System.out.println("Collision detected");
 					move( -.15f);
 					rotateAngle( (float) (PI/6.0));
 					move( .10f);
@@ -185,7 +186,7 @@ public class main {
 		int angle = (int) (360.0 * numRotations);
 		System.out.println("moving wheels " + angle + " degrees ");
 		left.startSynchronization();
-		left.rotate(angle, false);
+		left.rotate(angle, true);
 		right.rotate(angle, false);
 		left.endSynchronization();
 	}
