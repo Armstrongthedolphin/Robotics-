@@ -99,6 +99,7 @@ public class main {
 		error = sonicSample[0] - setDistance;
 		while(forever){
 			newerror = sonicSample[0] - setDistance;
+			System.out.print("E " + (int)newerror*100 + "  ");
 			errordiff = newerror - error; // if positive, error increase
 			//according to the error difference, adjust the angle with one wheel set to speed 0
 			if ( abs(errordiff) > terminatediff || newerror > infinity ){//end of the wall, break loop
@@ -218,7 +219,7 @@ public class main {
 				wheelRotationSpeedRadians = (float) (wheelRotationSpeedDegrees  * PI / 180.0);
 				desiredAngularVelocity = (float) (( wheelRotationSpeedRadians * RADIUS) / AXLE_LENGTH) ;
 				timeToRotate = (long) ( angle / desiredAngularVelocity * 1000000000.0)  + System.nanoTime(); 
-				System.out.println("timeToRotate is " + timeToRotate);
+				System.out.print("T " + timeToRotate + "  ");
 				left.forward();
 				while(System.nanoTime() < timeToRotate) {
 					left.forward();
