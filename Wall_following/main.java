@@ -30,13 +30,15 @@ public class main {
 		left= new EV3MediumRegulatedMotor(MotorPort.A);
 		right = new EV3MediumRegulatedMotor(MotorPort.D);
 		left.synchronizeWith(new EV3MediumRegulatedMotor[] {right});
-		
 		EV3TouchSensor touchSensor = new EV3TouchSensor(SensorPort.S3);
 		EV3UltrasonicSensor ultraSensor = new EV3UltrasonicSensor(SensorPort.S4);
 		SensorMode touch = touchSensor.getTouchMode();
 		SensorMode sonic = (SensorMode) ultraSensor.getDistanceMode();
 		float[] touchSample = new float[touch.sampleSize()];
 		float[] sonicSample = new float[sonic.sampleSize()];
+
+		
+		
 		left.startSynchronization();
 		right.forward();
 		left.forward();
@@ -52,18 +54,19 @@ public class main {
 		left.endSynchronization();
 		
 		//back up 15cm
-		Sound.beep();
-		float distanceToGo = .15f;
-		double numRotations = ( distanceToGo / (RADIUS * 2 * PI));
-		int backAngle = (int) (-360.0 * numRotations);
-		System.out.println(backAngle);
-		left.setSpeed(180);
-		right.setSpeed(180);
+		//Sound.beep();
+		//Button.ENTER.waitForPressAndRelease();
+		while(touchSample[0] == 0){
+			touch.fetchSample(touchSample, 0);
+		}
 		left.startSynchronization();
-		left.rotate(backAngle, false);
-		right.rotate(backAngle, false);
+		right.stop();
+		left.stop();
 		left.endSynchronization();
+
+		//back up 15cm
 		Sound.beep();
+		move(-.15f);
 		
 		//turn right 
 		rotateAngle((float) (PI/2.0));
@@ -74,20 +77,18 @@ public class main {
 		
 		
 		
-		
-		
 		//wall following (Bang Bang)
-		float setDistance = .05f;
-		float initspeed = 90f;
+		float setDistance = .10f;
+		float initspeed = 180f;
 		float error = 0f;
 		float newerror = 0f;
 		float errordiff = 0f;
-		float setbuffer = 0.02f;
+		float setbuffer = 0.05f;
 		float terminatediff = 0.4f;
 		float distanceTraveled = 0f;
 		float adjustAngle = 0f;
 		float infinity = .40f;
-		float travelTime = 100f;
+		float travelTime = 350f;
 		boolean forever = true;
 		left.startSynchronization();
 		right.forward();//left wheel
@@ -97,28 +98,36 @@ public class main {
 		error = sonicSample[0] - setDistance;
 		while(forever){
 
-			newerror = sonicSample[0] - setDistance;
-			System.out.print("E " + (int)newerror*100 + "  ");
+			newerror = sonicSample[0] - setDistance;			
+			errordiff = newerror - error; // if positive, error increase
+			System.out.print("E " + newerror + " " + errordiff+ " ");
 
-						//last resort collision
+			//last resort collision detection
 			if(touchSample[0] != 0){
 				move( -.15f);
 				rotateAngle( (float) (PI/6.0));
 				move( .10f);
 			}
-			errordiff = newerror - error; // if positive, error increase
 			//according to the error difference, adjust the angle with one wheel set to speed 0
 			if ( abs(errordiff) > terminatediff || newerror > infinity ){//end of the wall, break loop
 				
 				break;
-			} else if(abs(errordiff) > setbuffer){
-				//adjust angle
-				//calculate distance traveled
-				distanceTraveled = (float) ( initspeed * travelTime * (PI / 360) * RADIUS);
-				adjustAngle = calculateAngle(error, newerror,distanceTraveled );
-				rotateAngle(adjustAngle);
-				
+			}else {
+				if(newerror< -1*setbuffer || newerror> setbuffer){//if drifting left from the offset turn right
+					adjustAngle = calculateAngle(error, newerror,distanceTraveled );
+					rotateAngle(adjustAngle);	
+				}
+
 			}
+//			} else if(abs(errordiff) > setbuffer){
+//				//adjust angle
+//				//calculate distance traveled
+//				distanceTraveled = (float) ( initspeed * travelTime*0.001 * (PI / 360) * RADIUS); //m
+//				System.out.print("D " + distanceTraveled + " " );//15.118915
+//				adjustAngle = calculateAngle(error, newerror,distanceTraveled );
+//				rotateAngle(adjustAngle, left, right);
+//				
+//			}
 
 			error = newerror;
 			left.setSpeed(initspeed);
@@ -151,8 +160,7 @@ public class main {
 		Sound.beepSequenceUp();
 		
 		//move 0.75m 
-		distanceToGo = 0.75f;
-		move(distanceToGo);
+		move(.75f);
 		
 	}
 	
@@ -187,10 +195,51 @@ public class main {
 		long initTime = System.nanoTime();
 		long timeToRotate;
 		float desiredAngularVelocity;
-		int wheelRotationSpeedDegrees;
+		int wheelRotationSpeedDegrees,RightwheelRotationSpeedDegrees,LeftwheelRotationSpeedDegrees;
 		float wheelRotationSpeedRadians;
 		
-		System.out.println("Turning " + (int)(angle * 180.0f/PI) + "degrees" );
+		System.out.print((int)(angle * 180.0f/PI) + "deg   " );
+		RightwheelRotationSpeedDegrees = right.getRotationSpeed();
+		LeftwheelRotationSpeedDegrees = right.getRotationSpeed();
+//		if(RightwheelRotationSpeedDegrees <=  5 && LeftwheelRotationSpeedDegrees <= 5){//sammy is stationary
+//			if((angle < 0)){//turning left
+//				wheelRotationSpeedDegrees = RightwheelRotationSpeedDegrees;
+//				System.out.println("stationary left turn");
+//				wheelRotationSpeedDegrees = 180;
+//				right.setSpeed(wheelRotationSpeedDegrees);
+//				wheelRotationSpeedRadians = (float) (wheelRotationSpeedDegrees  * PI / 180.0);
+//				desiredAngularVelocity = (float) (( wheelRotationSpeedRadians * RADIUS) / AXLE_LENGTH) ;
+//				timeToRotate = (long) ( -angle / desiredAngularVelocity * 1000000000.0) + System.nanoTime(); 
+//				right.forward();
+//				while(System.nanoTime() < timeToRotate) {
+//					right.forward();
+//				}
+//				right.stop();
+//			}else{
+//				wheelRotationSpeedDegrees = LeftwheelRotationSpeedDegrees;
+//				
+//				System.out.println("stationary right turn");
+//				wheelRotationSpeedDegrees = 180;
+//				left.setSpeed(wheelRotationSpeedDegrees);
+//				wheelRotationSpeedRadians = (float) (wheelRotationSpeedDegrees  * PI / 180.0);
+//				desiredAngularVelocity = (float) (( wheelRotationSpeedRadians * RADIUS) / AXLE_LENGTH) ;
+//				timeToRotate = (long) ( angle / desiredAngularVelocity * 1000000000.0)  + System.nanoTime(); 
+//				System.out.print("T " + timeToRotate + "  ");
+//				left.forward();
+//				while(System.nanoTime() < timeToRotate) {
+//					left.forward();
+//				}
+//				left.stop();
+//			}
+//		}else{ //sammie was originally moving
+//			if(currentError>0){
+//				
+//			}else{
+//				
+//			}
+//			
+//			
+//		}
 		if (angle < 0) {	//turning left
 			
 			wheelRotationSpeedDegrees = right.getRotationSpeed();
@@ -253,7 +302,15 @@ public class main {
 	//outputs the angle of attack to object detected by sonar in radians
 	//positive values mean going towards object
 	private static float calculateAngle(float sonar0, float sonar1, float distanceTravelled) {
-		float angle = (float) Math.acos((sonar1 - sonar0)/distanceTravelled);
+		float angle;
+		float maxAngle = (float) (10*(PI/180));
+		float sonarscaler = 1f;
+		if(sonar1>0){//turn left
+			angle= maxAngle *-1 ;
+		}else{//turn right
+			angle= maxAngle;
+		}
+		//angle= (float) Math.atan((sonar0 - sonar1)/distanceTravelled);
 		return angle;
 	}
 	
