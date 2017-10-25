@@ -19,7 +19,7 @@ public class main {
 	final static double RADIUS= .0275; //RADIUS of the tires in meters
 	final static double PI = 3.141592653589793;
 	final static float SONAR_OFFSET = .024f; //how far the sonar is from front of robut
-	final static double AXLE_LENGTH = .119;
+	final static double AXLE_LENGTH = .122;
 	// static double mDisplacement = 0.0;
 	static double mOrientation = 0.0;
 	static EV3MediumRegulatedMotor left;
@@ -37,8 +37,7 @@ public class main {
 		float[] touchSample = new float[touch.sampleSize()];
 		float[] sonicSample = new float[sonic.sampleSize()];
 
-		
-		
+		System.out.println("Moving forward");
 		left.startSynchronization();
 		right.forward();
 		left.forward();
@@ -256,6 +255,8 @@ public class main {
 				right.forward();
 			}
 		}
+		left.setSpeed(wheelRotationSpeedDegrees);
+		right.setSpeed(wheelRotationSpeedDegrees);
 		mOrientation += angle;
 	}
 	
