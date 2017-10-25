@@ -52,7 +52,6 @@ public class main {
 		
 		//back up 15cm
 		Sound.beep();
-		Button.ENTER.waitForPressAndRelease();
 		float distanceToGo = .15f;
 		double numRotations = ( distanceToGo / (RADIUS * 2 * PI));
 		int backAngle = (int) (-360.0 * numRotations);
@@ -63,9 +62,7 @@ public class main {
 		mA.rotate(backAngle, false);
 		mB.rotate(backAngle, false);
 		mA.endSynchronization();
-		
 		Sound.beep();
-		Button.ENTER.waitForPressAndRelease();
 		
 		//turn right 
 		rotateAngle((float) (PI/2.0), mA, mB);
@@ -133,6 +130,11 @@ public class main {
 		mA.endSynchronization();
 		Sound.beep();
 		Button.ENTER.waitForPressAndRelease();
+		
+		
+		
+		
+		
 		
 		//turn to face forward
 		rotateAngle((float) -mOrientation, mA, mB);
