@@ -56,7 +56,7 @@ public class main {
 		Sound.beep();
 		System.out.println("Moving Backwards");
 		move(-.15f);
-//		Button.ENTER.waitForPressAndRelease();
+		Button.ENTER.waitForPressAndRelease();
 //		double numRotations = ( .15 / (RADIUS * 2 * PI));
 //		int angle = (int) (-360.0 * numRotations);
 //		left.startSynchronization();
@@ -86,7 +86,7 @@ public class main {
 		float terminatediff = 0.4f;
 		float distanceTraveled = 0f;
 		float adjustAngle = 0f;
-		float infinity = .40f;
+		float infinity = .30f;
 		long travelTime = 100000000; //in nanoseconds
 		double orientationTolerance = PI/6.0;
 		long timestamp;
@@ -189,6 +189,8 @@ public class main {
 		left.rotate(angle, true);
 		right.rotate(angle, false);
 		left.endSynchronization();
+		while(left.isMoving()) {
+		}
 	}
 
 
