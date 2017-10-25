@@ -67,7 +67,7 @@ public class main {
 		//turn right 
 		rotateAngle((float) (PI/2.0), mA, mB);
 		Sound.beep();
-		Button.ENTER.waitForPressAndRelease();
+
 		
 		
 		
@@ -136,9 +136,10 @@ public class main {
 		
 		
 		
+		System.out.println("Returning to original heading");
 		//turn to face forward
 		rotateAngle((float) -mOrientation, mA, mB);
-		
+		Sound.beepSequenceUp();
 		
 		//move 0.75m 
 		distanceToGo = 0.75f;
