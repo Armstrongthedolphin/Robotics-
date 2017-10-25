@@ -61,7 +61,7 @@ public class main {
 		mA.startSynchronization();
 		mA.rotate(backAngle, false);
 		mB.rotate(backAngle, false);
-		mA.endSynchronization();
+		mA.endSynchro	nization();
 		Sound.beep();
 		
 		//turn right 
@@ -95,8 +95,14 @@ public class main {
 		sonic.fetchSample(sonicSample, 0);
 		error = sonicSample[0] - setDistance;
 		while(forever){
+
 			newerror = sonicSample[0] - setDistance;
 			System.out.print("E " + (int)newerror*100 + "  ");
+
+						//last resort collision
+			if(touchSample[0] != 0){
+
+			}
 			errordiff = newerror - error; // if positive, error increase
 			//according to the error difference, adjust the angle with one wheel set to speed 0
 			if ( abs(errordiff) > terminatediff || newerror > infinity ){//end of the wall, break loop
@@ -120,7 +126,7 @@ public class main {
 				e.printStackTrace();
 			}
 			sonic.fetchSample(sonicSample, 0);
-			
+			touch.fetchSample(touchSample, 0);
 		}
 		
 		//test
@@ -143,15 +149,19 @@ public class main {
 		
 		//move 0.75m 
 		distanceToGo = 0.75f;
-		goforward(distanceToGo, mA, mB);
+		move(distanceToGo, mA, mB);
 		
 	}
 	
 	
-	private static void goforward(float distanceToGo, EV3MediumRegulatedMotor left, EV3MediumRegulatedMotor right) {
-		float distance = distanceToGo;
-		double numRotations = ( distance / (RADIUS * 2 * PI));
-		int angle = (int) (360.0 * numRotations);
+	private static void move(float distanceToGo, EV3MediumRegulatedMotor left, EV3MediumRegulatedMotor right) {
+		double numRotations = ( distanceToGo / (RADIUS * 2 * PI));
+		int angle;
+		if (distanceToGo < 0){
+			angle = (int) (-360.0 * numRotations);
+		} else {
+			angle = (int) (360.0 * numRotations);
+		}
 		left.setSpeed(180);
 		right.setSpeed(180);
 		left.startSynchronization();
@@ -161,17 +171,11 @@ public class main {
 		
 	}
 	
-	private static void goforward(float distanceToGo, int leftSpeed, int rightSpeed, EV3MediumRegulatedMotor left, EV3MediumRegulatedMotor right) {
-		float distance = distanceToGo;
-		double numRotations = ( distance / (RADIUS * 2 * PI));
-		int angle = (int) (360.0 * numRotations);
+	private static void move(float distanceToGo, int leftSpeed, int rightSpeed, EV3MediumRegulatedMotor left, EV3MediumRegulatedMotor right) {
+		assert(distanceToGo > 0 || (leftSpeed < 0 && rightSpeed < 0));
 		left.setSpeed(leftSpeed);
 		right.setSpeed(rightSpeed);
-		left.startSynchronization();
-		left.rotate(angle, false);
-		right.rotate(angle, false);
-		left.endSynchronization();
-		
+		move(distanceToGo, left, right);
 	}
 
 
