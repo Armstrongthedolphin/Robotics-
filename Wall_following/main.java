@@ -19,7 +19,7 @@ public class main {
 	final static double RADIUS= .0275; //RADIUS of the tires in meters
 	final static double PI = 3.141592653589793;
 	final static float SONAR_OFFSET = .024f; //how far the sonar is from front of robut
-	final static double AXLE_LENGTH = .124;
+	final static double AXLE_LENGTH = .119;
 	// static double mDisplacement = 0.0;
 	static double mOrientation = 0.0;
 	static EV3MediumRegulatedMotor left;
@@ -55,11 +55,21 @@ public class main {
 
 		//back up 15cm
 		Sound.beep();
+		System.out.println("Moving Backwards");
 		move(-.15f);
+//		double numRotations = ( .15 / (RADIUS * 2 * PI));
+//		int angle = (int) (-360.0 * numRotations);
+//		left.startSynchronization();
+//		left.rotate(angle, false);
+//		right.rotate(angle, false);
+//		left.endSynchronization();
+//		Button.ENTER.waitForPressAndRelease();
 		
 		//turn right 
 		rotateAngle((float) (PI/2.0));
 		Sound.beep();
+		Button.ENTER.waitForPressAndRelease();
+		
 
 		
 		
@@ -155,27 +165,19 @@ public class main {
 	
 	
 	private static void move(float distanceToGo) {
+		move(distanceToGo, 180, 180);
+	}
+	
+	private static void move(float distanceToGo, int leftSpeed, int rightSpeed) {
+		left.setSpeed(leftSpeed);
+		right.setSpeed(rightSpeed);
 		double numRotations = ( distanceToGo / (RADIUS * 2 * PI));
-		int angle;
-		if (distanceToGo < 0){
-			angle = (int) (-360.0 * numRotations);
-		} else {
-			angle = (int) (360.0 * numRotations);
-		}
-		left.setSpeed(180);
-		right.setSpeed(180);
+		int angle = (int) (360.0 * numRotations);
+		System.out.println("moving wheels " + angle + " degrees ");
 		left.startSynchronization();
 		left.rotate(angle, false);
 		right.rotate(angle, false);
 		left.endSynchronization();
-		
-	}
-	
-	private static void move(float distanceToGo, int leftSpeed, int rightSpeed) {
-		assert(distanceToGo > 0 || (leftSpeed < 0 && rightSpeed < 0));
-		left.setSpeed(leftSpeed);
-		right.setSpeed(rightSpeed);
-		move(distanceToGo);
 	}
 
 
@@ -187,53 +189,15 @@ public class main {
 		int wheelRotationSpeedDegrees,RightwheelRotationSpeedDegrees,LeftwheelRotationSpeedDegrees;
 		float wheelRotationSpeedRadians;
 		
-		System.out.print((int)(angle * 180.0f/PI) + "deg   " );
+		System.out.print((int)(angle * 180.0f/PI) + "degrees" );
 		RightwheelRotationSpeedDegrees = right.getRotationSpeed();
 		LeftwheelRotationSpeedDegrees = right.getRotationSpeed();
-//		if(RightwheelRotationSpeedDegrees <=  5 && LeftwheelRotationSpeedDegrees <= 5){//sammy is stationary
-//			if((angle < 0)){//turning left
-//				wheelRotationSpeedDegrees = RightwheelRotationSpeedDegrees;
-//				System.out.println("stationary left turn");
-//				wheelRotationSpeedDegrees = 180;
-//				right.setSpeed(wheelRotationSpeedDegrees);
-//				wheelRotationSpeedRadians = (float) (wheelRotationSpeedDegrees  * PI / 180.0);
-//				desiredAngularVelocity = (float) (( wheelRotationSpeedRadians * RADIUS) / AXLE_LENGTH) ;
-//				timeToRotate = (long) ( -angle / desiredAngularVelocity * 1000000000.0) + System.nanoTime(); 
-//				right.forward();
-//				while(System.nanoTime() < timeToRotate) {
-//					right.forward();
-//				}
-//				right.stop();
-//			}else{
-//				wheelRotationSpeedDegrees = LeftwheelRotationSpeedDegrees;
-//				
-//				System.out.println("stationary right turn");
-//				wheelRotationSpeedDegrees = 180;
-//				left.setSpeed(wheelRotationSpeedDegrees);
-//				wheelRotationSpeedRadians = (float) (wheelRotationSpeedDegrees  * PI / 180.0);
-//				desiredAngularVelocity = (float) (( wheelRotationSpeedRadians * RADIUS) / AXLE_LENGTH) ;
-//				timeToRotate = (long) ( angle / desiredAngularVelocity * 1000000000.0)  + System.nanoTime(); 
-//				System.out.print("T " + timeToRotate + "  ");
-//				left.forward();
-//				while(System.nanoTime() < timeToRotate) {
-//					left.forward();
-//				}
-//				left.stop();
-//			}
-//		}else{ //sammie was originally moving
-//			if(currentError>0){
-//				
-//			}else{
-//				
-//			}
-//			
-//			
-//		}
+		
 		if (angle < 0) {	//turning left
 			
 			wheelRotationSpeedDegrees = right.getRotationSpeed();
 			
-			if (wheelRotationSpeedDegrees <=  5) { //sammy is stationary
+			if (!right.isMoving()) { //sammy is stationary
 				System.out.println("stationary left turn");
 				wheelRotationSpeedDegrees = 180;
 				right.setSpeed(wheelRotationSpeedDegrees);
@@ -260,7 +224,7 @@ public class main {
 		} else {	//turning right
 			wheelRotationSpeedDegrees = left.getRotationSpeed();
 			
-			if (wheelRotationSpeedDegrees <=  5) { //sammy is stationary 
+			if (!left.isMoving()) { //sammy is stationary 
 				System.out.println("stationary right turn");
 				wheelRotationSpeedDegrees = 180;
 				left.setSpeed(wheelRotationSpeedDegrees);
