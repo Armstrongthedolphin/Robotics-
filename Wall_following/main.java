@@ -42,6 +42,7 @@ public class main {
 //		mA.endSynchronization();
 //		
 		//stop when you hit a wall
+
 //		while(touchSample[0] == 0){
 //			touch.fetchSample(touchSample, 0);
 //		}
@@ -70,8 +71,34 @@ public class main {
 //		//turn right 
 //		rotateAngle((float) (PI/2.0), mA, mB);
 	
+
+		while(touchSample[0] == 0){
+			touch.fetchSample(touchSample, 0);
+		}
+		mA.startSynchronization();
+		mB.stop();
+		mA.stop();
+		mA.endSynchronization();
+		
+		//back up 15cm
 		Sound.beep();
-		Button.ENTER.waitForPressAndRelease();
+		float distanceToGo = .15f;
+		double numRotations = ( distanceToGo / (RADIUS * 2 * PI));
+		int backAngle = (int) (-360.0 * numRotations);
+		System.out.println(backAngle);
+		mA.setSpeed(180);
+		mB.setSpeed(180);
+		mA.startSynchronization();
+		mA.rotate(backAngle, false);
+		mB.rotate(backAngle, false);
+		mA.endSynchronization();
+		Sound.beep();
+		
+		//turn right 
+		rotateAngle((float) (PI/2.0), mA, mB);
+
+		Sound.beep();
+
 		
 		
 		
@@ -140,9 +167,15 @@ public class main {
 		Sound.beep();
 		Button.ENTER.waitForPressAndRelease();
 		
+		
+		
+		
+		
+		
+		System.out.println("Returning to original heading");
 		//turn to face forward
 		rotateAngle((float) -mOrientation, mA, mB);
-		
+		Sound.beepSequenceUp();
 		
 		//move 0.75m 
 		distanceToGo = 0.75f;
