@@ -52,17 +52,6 @@ public class main {
 		right.stop();
 		left.stop();
 		left.endSynchronization();
-		
-		//back up 15cm
-		//Sound.beep();
-		//Button.ENTER.waitForPressAndRelease();
-		while(touchSample[0] == 0){
-			touch.fetchSample(touchSample, 0);
-		}
-		left.startSynchronization();
-		right.stop();
-		left.stop();
-		left.endSynchronization();
 
 		//back up 15cm
 		Sound.beep();
