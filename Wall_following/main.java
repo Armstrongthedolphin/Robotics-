@@ -18,7 +18,7 @@ public class main {
 	
 	final static double RADIUS= .0275; //RADIUS of the tires in meters
 	final static double PI = 3.141592653589793;
-	final static float SONAR_OFFSET = .024f; //how far the sonar is from front of robut
+	final static float SONAR_OFFSET = .022f; //how far the sonar is from front of robut
 	final static double AXLE_LENGTH = .122;
 	// static double mDisplacement = 0.0;
 	static double mOrientation = 0.0;
@@ -56,6 +56,7 @@ public class main {
 		Sound.beep();
 		System.out.println("Moving Backwards");
 		move(-.15f);
+		Button.ENTER.waitForPressAndRelease();
 //		double numRotations = ( .15 / (RADIUS * 2 * PI));
 //		int angle = (int) (-360.0 * numRotations);
 //		left.startSynchronization();
@@ -86,7 +87,9 @@ public class main {
 		float distanceTraveled = 0f;
 		float adjustAngle = 0f;
 		float infinity = .40f;
-		float travelTime = 350f;
+		long travelTime = 100000000; //in nanoseconds
+		double orientationTolerance = PI/8.0;
+		long timestamp;
 		boolean forever = true;
 		left.startSynchronization();
 		right.forward();//left wheel
@@ -94,6 +97,8 @@ public class main {
 		left.endSynchronization();
 		sonic.fetchSample(sonicSample, 0);
 		error = sonicSample[0] - setDistance;
+		
+		touch.fetchSample(touchSample, 0);
 		while(forever){
 
 			newerror = sonicSample[0] - setDistance;			
@@ -101,10 +106,9 @@ public class main {
 			System.out.print("E " + newerror + " " + errordiff+ " ");
 
 			//last resort collision detection
-			if(touchSample[0] != 0){
-				move( -.15f);
-				rotateAngle( (float) (PI/6.0));
-				move( .10f);
+			
+			if(mOrientation < orientationTolerance) {
+				break;
 			}
 			//according to the error difference, adjust the angle with one wheel set to speed 0
 			if ( abs(errordiff) > terminatediff || newerror > infinity ){//end of the wall, break loop
@@ -130,11 +134,18 @@ public class main {
 			error = newerror;
 			left.setSpeed(initspeed);
 			right.setSpeed(initspeed);
-			try {
-				Thread.sleep((long)travelTime);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			
+			timestamp = System.nanoTime() + travelTime;
+			while(System.nanoTime() < timestamp) {
+				touch.fetchSample(touchSample, 0);
+				if(touchSample[0] != 0){
+					move( -.15f);
+					rotateAngle( (float) (PI/6.0));
+					move( .10f);
+					
+				}
 			}
+
 			sonic.fetchSample(sonicSample, 0);
 			touch.fetchSample(touchSample, 0);
 		}
@@ -145,7 +156,7 @@ public class main {
 		left.stop();
 		left.endSynchronization();
 		Sound.beep();
-		Button.ENTER.waitForPressAndRelease();
+	
 		
 		
 		
@@ -159,7 +170,7 @@ public class main {
 		
 		//move 0.75m 
 		move(.75f);
-		
+		Button.ENTER.waitForPressAndRelease();
 	}
 	
 	
@@ -170,7 +181,7 @@ public class main {
 	private static void move(float distanceToGo, int leftSpeed, int rightSpeed) {
 		left.setSpeed(leftSpeed);
 		right.setSpeed(rightSpeed);
-		double numRotations = ( distanceToGo / (RADIUS * 2 * PI));
+		double numRotations = ( distanceToGo / (RADIUS * 2.0 * PI));
 		int angle = (int) (360.0 * numRotations);
 		System.out.println("moving wheels " + angle + " degrees ");
 		left.startSynchronization();
@@ -250,6 +261,9 @@ public class main {
 		left.setSpeed(wheelRotationSpeedDegrees);
 		right.setSpeed(wheelRotationSpeedDegrees);
 		mOrientation += angle;
+		if (mOrientation > (2.0 * PI)) {
+			mOrientation -= PI;
+		}
 	}
 	
 	//takes in two sonar readings and the distance traveled between those two readings
