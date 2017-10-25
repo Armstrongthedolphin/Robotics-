@@ -20,15 +20,16 @@ public class main {
 	final static double PI = 3.141592653589793;
 	final static float SONAR_OFFSET = .024f; //how far the sonar is from front of robut
 	final static double AXLE_LENGTH = .124;
-	static double displacement = 0.0;
+	// static double mDisplacement = 0.0;
 	static double mOrientation = 0.0;
-	
+	EV3MediumRegulatedMotor left;
+	EV3MediumRegulatedMotor right;
 	
 	public static void main(String[] args) {
 		
-		EV3MediumRegulatedMotor mA = new EV3MediumRegulatedMotor(MotorPort.A);
-		EV3MediumRegulatedMotor mB = new EV3MediumRegulatedMotor(MotorPort.D);
-		mA.synchronizeWith(new EV3MediumRegulatedMotor[] {mB});
+		left= new EV3MediumRegulatedMotor(MotorPort.A);
+		right = new EV3MediumRegulatedMotor(MotorPort.D);
+		left.synchronizeWith(new EV3MediumRegulatedMotor[] {right});
 		
 		EV3TouchSensor touchSensor = new EV3TouchSensor(SensorPort.S3);
 		EV3UltrasonicSensor ultraSensor = new EV3UltrasonicSensor(SensorPort.S4);
@@ -36,19 +37,19 @@ public class main {
 		SensorMode sonic = (SensorMode) ultraSensor.getDistanceMode();
 		float[] touchSample = new float[touch.sampleSize()];
 		float[] sonicSample = new float[sonic.sampleSize()];
-		mA.startSynchronization();
-		mB.forward();
-		mA.forward();
-		mA.endSynchronization();
+		left.startSynchronization();
+		right.forward();
+		left.forward();
+		left.endSynchronization();
 		
 		//stop when you hit a wall
 		while(touchSample[0] == 0){
 			touch.fetchSample(touchSample, 0);
 		}
-		mA.startSynchronization();
-		mB.stop();
-		mA.stop();
-		mA.endSynchronization();
+		left.startSynchronization();
+		right.stop();
+		left.stop();
+		left.endSynchronization();
 		
 		//back up 15cm
 		Sound.beep();
@@ -56,16 +57,16 @@ public class main {
 		double numRotations = ( distanceToGo / (RADIUS * 2 * PI));
 		int backAngle = (int) (-360.0 * numRotations);
 		System.out.println(backAngle);
-		mA.setSpeed(180);
-		mB.setSpeed(180);
-		mA.startSynchronization();
-		mA.rotate(backAngle, false);
-		mB.rotate(backAngle, false);
-		mA.endSynchro	nization();
+		left.setSpeed(180);
+		right.setSpeed(180);
+		left.startSynchronization();
+		left.rotate(backAngle, false);
+		right.rotate(backAngle, false);
+		left.endSynchro	nization();
 		Sound.beep();
 		
 		//turn right 
-		rotateAngle((float) (PI/2.0), mA, mB);
+		rotateAngle((float) (PI/2.0));
 		Sound.beep();
 
 		
@@ -88,10 +89,10 @@ public class main {
 		float infinity = .40f;
 		float travelTime = 100f;
 		boolean forever = true;
-		mA.startSynchronization();
-		mB.forward();//left wheel
-		mA.forward();//right wheel
-		mA.endSynchronization();
+		left.startSynchronization();
+		right.forward();//left wheel
+		left.forward();//right wheel
+		left.endSynchronization();
 		sonic.fetchSample(sonicSample, 0);
 		error = sonicSample[0] - setDistance;
 		while(forever){
@@ -101,7 +102,7 @@ public class main {
 
 						//last resort collision
 			if(touchSample[0] != 0){
-
+				move()
 			}
 			errordiff = newerror - error; // if positive, error increase
 			//according to the error difference, adjust the angle with one wheel set to speed 0
@@ -113,13 +114,13 @@ public class main {
 				//calculate distance traveled
 				distanceTraveled = (float) ( initspeed * travelTime * (PI / 360) * RADIUS);
 				adjustAngle = calculateAngle(error, newerror,distanceTraveled );
-				rotateAngle(adjustAngle, mA, mB);
+				rotateAngle(adjustAngle);
 				
 			}
 
 			error = newerror;
-			mA.setSpeed(initspeed);
-			mB.setSpeed(initspeed);
+			left.setSpeed(initspeed);
+			right.setSpeed(initspeed);
 			try {
 				Thread.sleep((long)travelTime);
 			} catch (InterruptedException e) {
@@ -130,10 +131,10 @@ public class main {
 		}
 		
 		//test
-		mA.startSynchronization();
-		mB.stop();
-		mA.stop();
-		mA.endSynchronization();
+		left.startSynchronization();
+		right.stop();
+		left.stop();
+		left.endSynchronization();
 		Sound.beep();
 		Button.ENTER.waitForPressAndRelease();
 		
@@ -144,17 +145,17 @@ public class main {
 		
 		System.out.println("Returning to original heading");
 		//turn to face forward
-		rotateAngle((float) -mOrientation, mA, mB);
+		rotateAngle((float) -mOrientation);
 		Sound.beepSequenceUp();
 		
 		//move 0.75m 
 		distanceToGo = 0.75f;
-		move(distanceToGo, mA, mB);
+		move(distanceToGo);
 		
 	}
 	
 	
-	private static void move(float distanceToGo, EV3MediumRegulatedMotor left, EV3MediumRegulatedMotor right) {
+	private static void move(float distanceToGo) {
 		double numRotations = ( distanceToGo / (RADIUS * 2 * PI));
 		int angle;
 		if (distanceToGo < 0){
@@ -171,15 +172,15 @@ public class main {
 		
 	}
 	
-	private static void move(float distanceToGo, int leftSpeed, int rightSpeed, EV3MediumRegulatedMotor left, EV3MediumRegulatedMotor right) {
+	private static void move(float distanceToGo, int leftSpeed, int rightSpeed) {
 		assert(distanceToGo > 0 || (leftSpeed < 0 && rightSpeed < 0));
 		left.setSpeed(leftSpeed);
 		right.setSpeed(rightSpeed);
-		move(distanceToGo, left, right);
+		move(distanceToGo);
 	}
 
 
-	private static void rotateAngle(float angle, EV3MediumRegulatedMotor left, EV3MediumRegulatedMotor right) {
+	private static void rotateAngle(float angle) {
 		assert(right.getRotationSpeed() == 0 || left.getRotationSpeed() == 0);
 		long initTime = System.nanoTime();
 		long timeToRotate;
