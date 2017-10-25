@@ -22,8 +22,8 @@ public class main {
 	final static double AXLE_LENGTH = .124;
 	// static double mDisplacement = 0.0;
 	static double mOrientation = 0.0;
-	EV3MediumRegulatedMotor left;
-	EV3MediumRegulatedMotor right;
+	static EV3MediumRegulatedMotor left;
+	static EV3MediumRegulatedMotor right;
 	
 	public static void main(String[] args) {
 		
@@ -62,7 +62,7 @@ public class main {
 		left.startSynchronization();
 		left.rotate(backAngle, false);
 		right.rotate(backAngle, false);
-		left.endSynchro	nization();
+		left.endSynchronization();
 		Sound.beep();
 		
 		//turn right 
@@ -102,7 +102,9 @@ public class main {
 
 						//last resort collision
 			if(touchSample[0] != 0){
-				move()
+				move( -.15f);
+				rotateAngle( (float) (PI/6.0));
+				move( .10f);
 			}
 			errordiff = newerror - error; // if positive, error increase
 			//according to the error difference, adjust the angle with one wheel set to speed 0
