@@ -68,7 +68,7 @@ public class main {
 		Button.ENTER.waitForPressAndRelease();
 		
 		//turn right 
-		rotateAngle((float) (-PI/2.0), mA, mB);
+		rotateAngle((float) (PI/2.0), mA, mB);
 		Sound.beep();
 		Button.ENTER.waitForPressAndRelease();
 		
@@ -179,17 +179,18 @@ public class main {
 		int wheelRotationSpeedDegrees;
 		float wheelRotationSpeedRadians;
 		
-		System.out.println("Turning " + angle * 180.0f/PI + "degrees" );
+		System.out.println("Turning " + (int)(angle * 180.0f/PI) + "degrees" );
 		if (angle < 0) {	//turning left
 			
 			wheelRotationSpeedDegrees = right.getRotationSpeed();
 			
 			if (wheelRotationSpeedDegrees <=  5) { //sammy is stationary
+				System.out.println("stationary left turn");
 				wheelRotationSpeedDegrees = 180;
 				right.setSpeed(wheelRotationSpeedDegrees);
 				wheelRotationSpeedRadians = (float) (wheelRotationSpeedDegrees  * PI / 180.0);
 				desiredAngularVelocity = (float) (( wheelRotationSpeedRadians * RADIUS) / AXLE_LENGTH) ;
-				timeToRotate = (long) ( -angle / desiredAngularVelocity) * 1000000000; 
+				timeToRotate = (long) ( -angle / desiredAngularVelocity * 1000000000.0) + System.nanoTime(); 
 				right.forward();
 				while(System.nanoTime() < timeToRotate) {
 					right.forward();
@@ -199,7 +200,7 @@ public class main {
 			} else { //sammie was originally moving
 				wheelRotationSpeedRadians = (float) (wheelRotationSpeedDegrees  * PI / 180.0);
 				desiredAngularVelocity = (float) (( wheelRotationSpeedRadians * RADIUS) / AXLE_LENGTH) ;
-				timeToRotate = (long) ( -angle / desiredAngularVelocity) * 1000000000; 
+				timeToRotate = (long) ( -angle / desiredAngularVelocity * 1000000000.0) + System.nanoTime(); 
 				left.stop();
 				while(System.nanoTime() < timeToRotate) {
 				}
@@ -211,12 +212,13 @@ public class main {
 			wheelRotationSpeedDegrees = left.getRotationSpeed();
 			
 			if (wheelRotationSpeedDegrees <=  5) { //sammy is stationary 
-				
+				System.out.println("stationary right turn");
 				wheelRotationSpeedDegrees = 180;
 				left.setSpeed(wheelRotationSpeedDegrees);
 				wheelRotationSpeedRadians = (float) (wheelRotationSpeedDegrees  * PI / 180.0);
 				desiredAngularVelocity = (float) (( wheelRotationSpeedRadians * RADIUS) / AXLE_LENGTH) ;
-				timeToRotate = (long) ( -angle / desiredAngularVelocity) * 1000000000; 
+				timeToRotate = (long) ( angle / desiredAngularVelocity * 1000000000.0)  + System.nanoTime(); 
+				System.out.println("timeToRotate is " + timeToRotate);
 				left.forward();
 				while(System.nanoTime() < timeToRotate) {
 					left.forward();
@@ -226,7 +228,7 @@ public class main {
 			} else {
 				wheelRotationSpeedRadians = (float) (wheelRotationSpeedDegrees  * PI / 180.0);
 				desiredAngularVelocity = (float) (( wheelRotationSpeedRadians * RADIUS) / AXLE_LENGTH) ;
-				timeToRotate = (long) (angle / desiredAngularVelocity) * 1000000000; 
+				timeToRotate = (long) (angle / desiredAngularVelocity * 1000000000.0)  + System.nanoTime(); 
 				right.stop();
 				while(System.nanoTime() < timeToRotate) {
 				}
