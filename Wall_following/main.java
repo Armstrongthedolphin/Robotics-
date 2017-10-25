@@ -88,10 +88,9 @@ public class main {
 		float infinity = .40f;
 		float travelTime = 350f;
 		boolean forever = true;
-		
 		left.startSynchronization();
-		right.forward();
-		left.forward();
+		right.forward();//left wheel
+		left.forward();//right wheel
 		left.endSynchronization();
 		sonic.fetchSample(sonicSample, 0);
 		error = sonicSample[0] - setDistance;
@@ -104,19 +103,12 @@ public class main {
 			//last resort collision detection
 			if(touchSample[0] != 0){
 				move( -.15f);
-				//error of back up zone
-				sonic.fetchSample(sonicSample, 0);
-				error = sonicSample[0] - setDistance;
-				
 				rotateAngle( (float) (PI/6.0));
 				move( .10f);
-				
-				sonic.fetchSample(sonicSample, 0);
-				newerror = sonicSample[0] - setDistance;
-				errordiff = newerror - error;
 			}
 			//according to the error difference, adjust the angle with one wheel set to speed 0
 			if ( abs(errordiff) > terminatediff || newerror > infinity ){//end of the wall, break loop
+				
 				break;
 			}else {
 				if(newerror< -1*setbuffer || newerror> setbuffer){//if drifting left from the offset turn right
