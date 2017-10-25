@@ -66,6 +66,7 @@ public class main {
 //		Button.ENTER.waitForPressAndRelease();
 		
 		//turn right 
+		System.out.println("turn right");
 		rotateAngle((float) (PI/2.0));
 		Sound.beep();
 		
@@ -100,7 +101,7 @@ public class main {
 		
 		touch.fetchSample(touchSample, 0);
 		while(forever){
-
+			
 			newerror = sonicSample[0] - setDistance;			
 			errordiff = newerror - error; // if positive, error increase
 			System.out.print("E " + newerror + " " + errordiff+ " ");
