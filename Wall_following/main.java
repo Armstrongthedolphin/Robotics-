@@ -37,6 +37,8 @@ public class main {
 		float[] touchSample = new float[touch.sampleSize()];
 		float[] sonicSample = new float[sonic.sampleSize()];
 
+		Sound.beep();
+		Button.ENTER.waitForPressAndRelease();
 		System.out.println("Moving forward");
 		left.startSynchronization();
 		right.forward();
@@ -87,9 +89,10 @@ public class main {
 		float terminatediff = 0.4f;
 		float distanceTraveled = 0f;
 		float adjustAngle = 0f;
-		float infinity = .40f;
+
+		float infinity = .30f;
 		long travelTime = 100000000; //in nanoseconds
-		double orientationTolerance = PI/6.0;
+		double orientationTolerance = PI/7.0;
 		long timestamp;
 		boolean forever = true;
 		left.startSynchronization();
@@ -158,7 +161,8 @@ public class main {
 		left.stop();
 		left.endSynchronization();
 		Sound.beep();
-	
+		
+		move(.1f);
 		
 		
 		
@@ -190,6 +194,8 @@ public class main {
 		left.rotate(angle, true);
 		right.rotate(angle, false);
 		left.endSynchronization();
+		while(left.isMoving()) {
+		}
 	}
 
 
