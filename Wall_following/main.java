@@ -91,7 +91,7 @@ public class main {
 		float adjustAngle = 0f;
 
 		float infinity = .30f;
-		long travelTime = 250000000; //in nanoseconds
+		long travelTime = 100000000; //in nanoseconds
 		double orientationTolerance = PI/7.0;
 		long timestamp;
 		boolean forever = true;
@@ -112,12 +112,11 @@ public class main {
 
 			
 			if(mOrientation < orientationTolerance) {
-				System.out.println("mOrientation tolerance reached: " + mOrientation);
 				break;
 			}
 			//according to the error difference, adjust the angle with one wheel set to speed 0
 			if ( abs(errordiff) > terminatediff || newerror > infinity ){//end of the wall, break loop
-				System.out.println("infinite distance");
+				
 				break;
 			}else {
 				if(newerror< -1*setbuffer || newerror> setbuffer){//if drifting left from the offset turn right
@@ -182,15 +181,15 @@ public class main {
 	
 	
 	private static void move(float distanceToGo) {
-		move(distanceToGo, 180);
+		move(distanceToGo, 180, 180);
 	}
 	
-	private static void move(float distanceToGo, int speed) {
-		left.setSpeed(speed);
-		right.setSpeed(speed);
+	private static void move(float distanceToGo, int leftSpeed, int rightSpeed) {
+		left.setSpeed(leftSpeed);
+		right.setSpeed(rightSpeed);
 		double numRotations = ( distanceToGo / (RADIUS * 2.0 * PI));
 		int angle = (int) (360.0 * numRotations);
-//		System.out.println("moving wheels " + angle + " degrees ");
+		System.out.println("moving wheels " + angle + " degrees ");
 		left.startSynchronization();
 		left.rotate(angle, true);
 		right.rotate(angle, false);
@@ -208,7 +207,7 @@ public class main {
 		int wheelRotationSpeedDegrees,RightwheelRotationSpeedDegrees,LeftwheelRotationSpeedDegrees;
 		float wheelRotationSpeedRadians;
 		
-//		System.out.print((int)(angle * 180.0f/PI) + "degrees" );
+		System.out.print((int)(angle * 180.0f/PI) + "degrees" );
 		RightwheelRotationSpeedDegrees = right.getRotationSpeed();
 		LeftwheelRotationSpeedDegrees = right.getRotationSpeed();
 		
@@ -217,7 +216,7 @@ public class main {
 			wheelRotationSpeedDegrees = right.getRotationSpeed();
 			
 			if (!right.isMoving()) { //sammy is stationary
-//				System.out.println("stationary left turn");
+				System.out.println("stationary left turn");
 				wheelRotationSpeedDegrees = 180;
 				right.setSpeed(wheelRotationSpeedDegrees);
 				wheelRotationSpeedRadians = (float) (wheelRotationSpeedDegrees  * PI / 180.0);
