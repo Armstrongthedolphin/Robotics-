@@ -88,7 +88,6 @@ public class main {
 		float distanceTraveled = 0f;
 		float adjustAngle = 0f;
 		float infinity = .40f;
-		float travelTime = 100f;
 		long travelTime = 100000000; //in nanoseconds
 		double orientationTolerance = PI/6.0;
 		long timestamp;
@@ -274,12 +273,21 @@ public class main {
 	//positive values mean going towards object
 	private static float calculateAngle(float sonar0, float sonar1, float distanceTravelled) {
 		float angle;
-		float maxAngle = (float) (10*(PI/180));
-		float sonarscaler = 1f;
+		float unitAngle = (float) (10*(PI/180));
+		float maxAngle = (float) (30*(PI/180));
+		float sonarscaler = 100f;
 		if(sonar1>0){//turn left
-			angle= maxAngle *-1 ;
+			if(unitAngle*(sonar1*sonarscaler) > maxAngle){
+				angle=maxAngle*-1;
+			}else{
+				angle= unitAngle*(sonar1*sonarscaler) *-1 ;
+			}
 		}else{//turn right
-			angle= maxAngle;
+			if(unitAngle*(-1*sonar1*sonarscaler) > maxAngle){
+				angle=maxAngle;
+			}else{
+				angle= unitAngle*(sonar1*sonarscaler) *-1 ;
+			}
 		}
 		//angle= (float) Math.atan((sonar0 - sonar1)/distanceTravelled);
 		return angle;
