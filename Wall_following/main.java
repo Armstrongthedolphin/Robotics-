@@ -24,9 +24,11 @@ public class main {
 	static double mOrientation = 0.0;
 	static EV3MediumRegulatedMotor left;
 	static EV3MediumRegulatedMotor right;
-	static SensorMode touch;
+	static SensorMode touchLeft;
+	static SensorMode touchRight;
 	static SensorMode sonic;
-	static float[] touchSample;
+	static float[] touchLeftSample;
+	static float[] touchRightSample;
 	static float[] sonicSample; 
 	
 	public static void main(String[] args) {
@@ -34,11 +36,14 @@ public class main {
 		left= new EV3MediumRegulatedMotor(MotorPort.A);
 		right = new EV3MediumRegulatedMotor(MotorPort.D);
 		left.synchronizeWith(new EV3MediumRegulatedMotor[] {right});
-		EV3TouchSensor touchSensor = new EV3TouchSensor(SensorPort.S3);
+		EV3TouchSensor touchLeftSensor = new EV3TouchSensor(SensorPort.S3);
+		EV3TouchSensor touchRightSensor = new EV3TouchSensor(SensorPort.S2);
 		EV3UltrasonicSensor ultraSensor = new EV3UltrasonicSensor(SensorPort.S4);
-		touch = touchSensor.getTouchMode();
+		touchLeft = touchLeftSensor.getTouchMode();
+		touchRight = touchRightSensor.getTouchMode();
 		sonic = (SensorMode) ultraSensor.getDistanceMode();
-		touchSample = new float[touch.sampleSize()];
+		touchLeftSample = new float[touchLeft.sampleSize()];
+		touchRightSample = new float[touchRight.sampleSize()];
 		sonicSample = new float[sonic.sampleSize()];
 
 		Sound.beep();
@@ -50,8 +55,11 @@ public class main {
 		left.endSynchronization();
 		
 		//stop when you hit a wall
-		while(touchSample[0] == 0){
-			touch.fetchSample(touchSample, 0);
+		touchLeft.fetchSample(touchLeftSample, 0);
+		touchRight.fetchSample(touchRightSample, 0);
+		while(touchLeftSample[0] == 0 || touchRightSample[0] == 0){
+			touchLeft.fetchSample(touchLeftSample, 0);
+			touchRight.fetchSample(touchRightSample, 0);
 		}
 		left.startSynchronization();
 		right.stop();
@@ -106,7 +114,8 @@ public class main {
 		sonic.fetchSample(sonicSample, 0);
 		error = sonicSample[0] - setDistance;
 		
-		touch.fetchSample(touchSample, 0);
+		touchLeft.fetchSample(touchLeftSample, 0);
+		touchRight.fetchSample(touchRightSample, 0);
 		while(forever){
 			
 			newerror = sonicSample[0] - setDistance;			
@@ -142,8 +151,9 @@ public class main {
 			
 			timestamp = System.nanoTime() + travelTime;
 			while(System.nanoTime() < timestamp) {
-				touch.fetchSample(touchSample, 0);
-				if(touchSample[0] != 0){
+				touchLeft.fetchSample(touchLeftSample, 0);
+				touchRight.fetchSample(touchRightSample, 0);
+				if(touchLeftSample[0] != 0 || touchRightSample[0] != 0){
 					System.out.println("Collision detected");
 					move( -.15f, false);
 					sonic.fetchSample(sonicSample, 0);
@@ -165,7 +175,8 @@ public class main {
 			right.setSpeed(initspeed);
 			
 			sonic.fetchSample(sonicSample, 0);
-			touch.fetchSample(touchSample, 0);
+			touchLeft.fetchSample(touchLeftSample, 0);
+			touchRight.fetchSample(touchRightSample, 0);
 		}
 		left.startSynchronization();
 		right.stop();
@@ -200,14 +211,16 @@ public class main {
 		left.rotate(angle, true);
 		right.rotate(angle, true);
 		left.endSynchronization();
-		touch.fetchSample(touchSample, 0);
+		touchLeft.fetchSample(touchLeftSample, 0);
+		touchRight.fetchSample(touchRightSample, 0);
 		if (distanceToGo < 0) {
 			while(left.isMoving())  {
 			}
 		} else {
 			while(left.isMoving()) {
-				touch.fetchSample(touchSample, 0);
-				if (touchSample[0] != 0) {
+				touchLeft.fetchSample(touchLeftSample, 0);
+				touchRight.fetchSample(touchRightSample, 0);
+				if (touchLeftSample[0] != 0 || touchRightSample[0] != 0) {
 					System.out.println("Collision!");
 					Sound.beep();
 					move(-.15f, false);
