@@ -24,6 +24,10 @@ public class main {
 	static double mOrientation = 0.0;
 	static EV3MediumRegulatedMotor left;
 	static EV3MediumRegulatedMotor right;
+	static SensorMode touch;
+	static SensorMode sonic;
+	static float[] touchSample;
+	static float[] sonicSample; 
 	
 	public static void main(String[] args) {
 		
@@ -32,10 +36,10 @@ public class main {
 		left.synchronizeWith(new EV3MediumRegulatedMotor[] {right});
 		EV3TouchSensor touchSensor = new EV3TouchSensor(SensorPort.S3);
 		EV3UltrasonicSensor ultraSensor = new EV3UltrasonicSensor(SensorPort.S4);
-		SensorMode touch = touchSensor.getTouchMode();
-		SensorMode sonic = (SensorMode) ultraSensor.getDistanceMode();
-		float[] touchSample = new float[touch.sampleSize()];
-		float[] sonicSample = new float[sonic.sampleSize()];
+		touch = touchSensor.getTouchMode();
+		sonic = (SensorMode) ultraSensor.getDistanceMode();
+		touchSample = new float[touch.sampleSize()];
+		sonicSample = new float[sonic.sampleSize()];
 
 		Sound.beep();
 		Button.ENTER.waitForPressAndRelease();
@@ -57,7 +61,7 @@ public class main {
 		//back up 15cm
 		Sound.beep();
 		System.out.println("Moving Backwards");
-		move(-.15f);
+		move(-.15f, false);
 //		Button.ENTER.waitForPressAndRelease();
 //		double numRotations = ( .15 / (RADIUS * 2 * PI));
 //		int angle = (int) (-360.0 * numRotations);
@@ -72,13 +76,12 @@ public class main {
 		rotateAngle((float) (PI/2.0));
 		Sound.beep();
 		
+		followWall();
 		
 
-		
-		
-		
-		
-		
+	}
+	
+	private static void followWall() {
 		//wall following (Bang Bang)
 		float setDistance = .10f;
 		float initspeed = 180f;
@@ -95,6 +98,7 @@ public class main {
 		double orientationTolerance = PI/7.0;
 		long timestamp;
 		boolean forever = true;
+		
 		left.startSynchronization();
 		right.forward();//left wheel
 		left.forward();//right wheel
@@ -135,66 +139,83 @@ public class main {
 //				
 //			}
 
-			error = newerror;
-			left.setSpeed(initspeed);
-			right.setSpeed(initspeed);
 			
 			timestamp = System.nanoTime() + travelTime;
 			while(System.nanoTime() < timestamp) {
 				touch.fetchSample(touchSample, 0);
 				if(touchSample[0] != 0){
 					System.out.println("Collision detected");
-					move( -.15f);
-					rotateAngle( (float) (PI/6.0));
-					move( .10f);
+					move( -.15f, false);
+					sonic.fetchSample(sonicSample, 0);
+					error = sonicSample[0] - setDistance;	
 					
+					rotateAngle( (float) (PI/6.0));
+					move( .10f, false);
+					sonic.fetchSample(sonicSample, 0);
+					newerror = sonicSample[0] - setDistance;			
+					left.startSynchronization();
+					right.forward();//left wheel
+					left.forward();//right wheel
+					left.endSynchronization();
+					break;
 				}
 			}
-
+			error = newerror;
+			left.setSpeed(initspeed);
+			right.setSpeed(initspeed);
+			
 			sonic.fetchSample(sonicSample, 0);
 			touch.fetchSample(touchSample, 0);
 		}
-		
-		//test
 		left.startSynchronization();
 		right.stop();
 		left.stop();
 		left.endSynchronization();
 		Sound.beep();
 		
-		move(.1f);
-		
-		
-		
-		
-		
-		
-		System.out.println("Returning to original heading");
+		move(.1f, true);	
+		System.out.println("Final orientation: " + (int) (mOrientation * 180.0 / PI));
 		//turn to face forward
+		
 		rotateAngle((float) -mOrientation);
 		Sound.beepSequenceUp();
 		
 		//move 0.75m 
-		move(.75f);
+		move(.75f, true);
 		Button.ENTER.waitForPressAndRelease();
 	}
 	
-	
-	private static void move(float distanceToGo) {
-		move(distanceToGo, 180, 180);
+	private static void move(float distanceToGo, boolean wallReturn) {
+		move(distanceToGo, 180, wallReturn);
 	}
 	
-	private static void move(float distanceToGo, int leftSpeed, int rightSpeed) {
-		left.setSpeed(leftSpeed);
-		right.setSpeed(rightSpeed);
+	private static void move(float distanceToGo, int speed, boolean wallReturn) {
+		left.setSpeed(speed);
+		right.setSpeed(speed);
 		double numRotations = ( distanceToGo / (RADIUS * 2.0 * PI));
 		int angle = (int) (360.0 * numRotations);
 		System.out.println("moving wheels " + angle + " degrees ");
+		
 		left.startSynchronization();
 		left.rotate(angle, true);
-		right.rotate(angle, false);
+		right.rotate(angle, true);
 		left.endSynchronization();
-		while(left.isMoving()) {
+		touch.fetchSample(touchSample, 0);
+		if (distanceToGo < 0) {
+			while(left.isMoving())  {
+			}
+		} else {
+			while(left.isMoving()) {
+				touch.fetchSample(touchSample, 0);
+				if (touchSample[0] != 0) {
+					System.out.println("Collision!");
+					Sound.beep();
+					move(-.15f, false);
+					rotateAngle((float) (PI/2.0));
+					followWall();
+					break;
+				}
+			}
 		}
 	}
 
@@ -216,7 +237,7 @@ public class main {
 			wheelRotationSpeedDegrees = right.getRotationSpeed();
 			
 			if (!right.isMoving()) { //sammy is stationary
-				System.out.println("stationary left turn");
+//				System.out.println("stationary left turn");
 				wheelRotationSpeedDegrees = 180;
 				right.setSpeed(wheelRotationSpeedDegrees);
 				wheelRotationSpeedRadians = (float) (wheelRotationSpeedDegrees  * PI / 180.0);
@@ -243,13 +264,13 @@ public class main {
 			wheelRotationSpeedDegrees = left.getRotationSpeed();
 			
 			if (!left.isMoving()) { //sammy is stationary 
-				System.out.println("stationary right turn");
+				// System.out.println("stationary right turn");
 				wheelRotationSpeedDegrees = 180;
 				left.setSpeed(wheelRotationSpeedDegrees);
 				wheelRotationSpeedRadians = (float) (wheelRotationSpeedDegrees  * PI / 180.0);
 				desiredAngularVelocity = (float) (( wheelRotationSpeedRadians * RADIUS) / AXLE_LENGTH) ;
 				timeToRotate = (long) ( angle / desiredAngularVelocity * 1000000000.0)  + System.nanoTime(); 
-				System.out.print("T " + timeToRotate + "  ");
+				// System.out.print("T " + timeToRotate + "  ");
 				left.forward();
 				while(System.nanoTime() < timeToRotate) {
 					left.forward();
