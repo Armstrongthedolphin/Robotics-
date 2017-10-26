@@ -85,7 +85,7 @@ public class main {
 		float error = 0f;
 		float newerror = 0f;
 		float errordiff = 0f;
-		float setbuffer = 0.05f;
+		float setbuffer = 0.02f;
 		float terminatediff = 0.4f;
 		float distanceTraveled = 0f;
 		float adjustAngle = 0f;
@@ -280,8 +280,8 @@ public class main {
 	private static float calculateAngle(float sonar0, float sonar1, float distanceTravelled) {
 		float angle;
 		float unitAngle = (float) (10*(PI/180));
-		float maxAngle = (float) (30*(PI/180));
-		float sonarscaler = 100f;
+		float maxAngle = (float) (20*(PI/180));
+		float sonarscaler = 1f;
 		if(sonar1>0){//turn left
 			if(unitAngle*(sonar1*sonarscaler) > maxAngle){
 				angle=maxAngle*-1;
