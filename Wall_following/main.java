@@ -96,13 +96,13 @@ public class main {
 		float error = 0f;
 		float newerror = 0f;
 		float errordiff = 0f;
-		float setbuffer = 0.04f;
+		float setbuffer = 0.03f;
 		float terminatediff = 0.4f;
 		float distanceTraveled = 0f;
 		float adjustAngle = 0f;
 
 		float infinity = .30f;
-		long travelTime = 100000000; //in nanoseconds
+		long travelTime = 250000000; //in nanoseconds
 		double orientationTolerance = PI/7.0;
 		long timestamp;
 		boolean forever = true;
@@ -125,11 +125,14 @@ public class main {
 
 			
 			if(mOrientation < orientationTolerance) {
+				System.out.println("mOrientation Under Tolerance" );
 				break;
 			}
 			//according to the error difference, adjust the angle with one wheel set to speed 0
 			if ( abs(errordiff) > terminatediff || newerror > infinity ){//end of the wall, break loop
-				
+				if(abs(errordiff) > terminatediff){
+					System.out.println("Error Difference exit" );
+				}
 				break;
 			}else {
 				if(newerror< -1*setbuffer || newerror> setbuffer){//if drifting left from the offset turn right
@@ -182,7 +185,7 @@ public class main {
 		right.stop();
 		left.stop();
 		left.endSynchronization();
-		Sound.beep();
+		Sound.beepSequence();
 		
 		move(.1f, true);	
 		System.out.println("Final orientation: " + (int) (mOrientation * 180.0 / PI));
